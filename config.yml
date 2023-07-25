@@ -1,0 +1,28 @@
+mysql:
+  config: 'charset=utf8mb4&parseTime=True&loc=Local'
+  max-idle-conns: 10
+  max-open-conns: 100
+  log-mode: true
+  log-zap: ""
+  prefix: 'xc'
+  path: '127.0.0.1:3306'
+  db-name: 'inscribe'
+  username: 'root'
+  password: '123456'
+zap:
+  level: 'info'
+  format: 'console'
+  prefix: ''
+  director: 'log'
+  link-name: 'log/latest_log'
+  show-line: true
+  encode-level: 'LowercaseColorLevelEncoder'
+  stacktrace-key: 'stacktrace'
+  log-in-console: true
+https:
+  is_https: false
+  ca_cert: ''  
+elastic_conf:
+  host: 'https://localhost:9200'
+  username: 'elastic'
+  password: '0wypne1=4NdK1dYTrV5+'  

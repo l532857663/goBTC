@@ -1,0 +1,90 @@
+package ord
+
+import (
+	"goBTC/db/inscribe"
+	"goBTC/elastic"
+	"goBTC/models"
+	"strconv"
+
+	"github.com/btcsuite/btcd/btcjson"
+	"github.com/shopspring/decimal"
+)
+
+func SaveInscribeInfoByTxInfo(blockHeight int64, res *models.OrdInscribeData, txInfo *btcjson.TxRawResult) error {
+	var (
+		tokenType  = inscribe.InscribeTypeNFT
+		action     = inscribe.ActionForMint
+		ord        string
+		logoURL    string
+		createAddr string
+	)
+	// tx
+	txId := txInfo.Txid
+	addr := txInfo.Vout[0].ScriptPubKey.Address
+	vout := txId + ":0"
+	inscribeId := txId + "i0"
+	// 判断铭文类型
+	if res.Brc20 != nil {
+		tokenType = inscribe.InscribeTypeBRC20
+		action = inscribe.OrdAction(res.Brc20.OP)
+		ord = res.Body
+	} else {
+		createAddr = addr
+		if len(res.Body) < 500 {
+			ord = res.Body
+		}
+	}
+
+	info := &inscribe.InscribeInfo{
+		InscribeID:   inscribeId,
+		TokenType:    tokenType,
+		Action:       action,
+		LogoURL:      logoURL,
+		OwnerAddress: addr,
+		CreateAddr:   createAddr,
+		Vout:         vout,
+		TxID:         txId,
+		Content:      ord,
+		ContentType:  res.ContentType,
+		ContentSize:  res.ContentSize,
+		BlockHeight:  strconv.FormatInt(blockHeight, 10),
+		BlockTime:    txInfo.Blocktime,
+	}
+	err := info.Create()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func SaveInscribeBrc20ByTxInfo(blockHeight int64, res *models.OrdInscribeData, txInfo *btcjson.TxRawResult) error {
+	// tx
+	txId := txInfo.Txid
+	addr := txInfo.Vout[0].ScriptPubKey.Address
+	vout := txId + ":0"
+	utxo := decimal.NewFromFloat(txInfo.Vout[0].Value).String()
+	action := inscribe.OrdAction(res.Brc20.OP)
+
+	ord := &inscribe.OrdToken{
+		InscribeID:   txId + "i0",
+		OwnerAddress: addr,
+		Vout:         vout,
+		Value:        utxo,
+		Tick:         res.Brc20.Tick,
+		TokenType:    res.Brc20.P,
+		Action:       action,
+		Amt:          res.Brc20.Amt,
+		Lim:          res.Brc20.Lim,
+		Supply:       res.Brc20.Max,
+		TxID:         txId,
+		BlockHeight:  strconv.FormatInt(blockHeight, 10),
+		BlockTime:    txInfo.Blocktime,
+		State:        inscribe.Brc20StatePending,
+		SyncState:    inscribe.StateSyncIsFalse,
+	}
+	err := ord.Create()
+	if err != nil {
+		return err
+	}
+	return nil
+}

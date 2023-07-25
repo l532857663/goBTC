@@ -1,0 +1,4 @@
+package ord
+
+func CheckInscriptionInfo() {
+}
