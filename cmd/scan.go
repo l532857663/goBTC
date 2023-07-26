@@ -77,7 +77,7 @@ func GetBlockInfo(startHeight, newHigh int64) {
 			if err != nil {
 				log.Info("GetInscribeIsExist", zap.Error(err))
 			}
-			log.Info("Get tx", zap.Any("txHash", txHash), zap.Any("witness len", len(witnessStr)), zap.Any("txHaveInscribe", txHaveInscribe))
+			// log.Info("Get tx", zap.Any("txHash", txHash), zap.Any("witness len", len(witnessStr)), zap.Any("txHaveInscribe", txHaveInscribe))
 			if witnessStr == "" {
 				if !txHaveInscribe {
 					continue
@@ -127,6 +127,8 @@ func GetBlockInfo(startHeight, newHigh int64) {
 			}
 			sum++
 		}
+		eTime := time.Now().Unix()
+		log.Info("Get block", zap.Any("all time", eTime-endTime))
 		log.Info("the block get inscribe:", zap.Any("sum", sum), zap.Any("sumBrc20", sumBrc20))
 	}
 	fmt.Println("[GetBlockInfo] End")

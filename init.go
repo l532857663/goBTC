@@ -49,7 +49,13 @@ func Shutdown() {
 
 func newBTCClient() *client.BTCClient {
 	// 构建节点客户端
-	nodeInfo := client.BTC_QUICKNODE_MAIN
+	nodeInfo := &client.Node{
+		Ip:       global.CONFIG.ChainNode.Ip,
+		Port:     global.CONFIG.ChainNode.Port,
+		User:     global.CONFIG.ChainNode.User,
+		Password: global.CONFIG.ChainNode.Password,
+		Net:      global.CONFIG.ChainNode.Net,
+	}
 	cli, err := client.NewBTCClient(nodeInfo)
 	if err != nil {
 		log.Fatalf("NewBTCClient error: %+v, nodeInfo: %+v\n", err, nodeInfo)

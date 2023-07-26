@@ -8,46 +8,6 @@ const (
 	RegNet  = "REGNET"
 )
 
-var (
-	// BTC 主网节点
-	BTC_GETBLOCK_MAIN = &Node{
-		Ip:       "",
-		Port:     0,
-		User:     "",
-		Password: "",
-		Net:      MainNet,
-	}
-	BTC_QUICKNODE_MAIN = &Node{
-		Ip:       "https://warmhearted-old-glade.btc.discover.quiknode.pro/??/",
-		Port:     0,
-		User:     "btc",
-		Password: "btc2021",
-		Net:      MainNet,
-	}
-	BTC_SELF_MAIN = &Node{
-		Ip:       "",
-		Port:     8332,
-		User:     "btc",
-		Password: "btc2021",
-		Net:      MainNet,
-	}
-	// 测试网节点
-	BTC_GETBLOCK_TEST = &Node{
-		Ip:       "",
-		Port:     0,
-		User:     "",
-		Password: "",
-		Net:      TestNet,
-	}
-	BTC_SELF_TEST = &Node{
-		Ip:       "",
-		Port:     18443,
-		User:     "",
-		Password: "",
-		Net:      TestNet,
-	}
-)
-
 // NodeInfo ----------------------------------------------------------
 
 // BTC Script Info ----------------------------------------------------------

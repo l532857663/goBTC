@@ -40,7 +40,7 @@ type OrdToken struct {
 
 type ActivityInfo struct {
 	InscribeId   string `json:"inscribe_id"`
-	InscribeType string `json:"inscribe_content"`
+	InscribeType string `json:"inscribe_type"`
 	TxHash       string `json:"tx_hash"`
 	ActivityType string `json:"activity_type"`
 	From         string `json:"from"`

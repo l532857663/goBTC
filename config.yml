@@ -26,3 +26,10 @@ elastic_conf:
   host: 'https://localhost:9200'
   username: 'elastic'
   password: '0wypne1=4NdK1dYTrV5+'  
+chain_node:
+  ip: ""
+  port: 
+  user:
+  password:  
+  net:  
+

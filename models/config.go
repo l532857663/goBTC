@@ -10,6 +10,7 @@ type Server struct {
 	Zap         Zap                   `mapstructure:"zap"          json:"zap"          yaml:"zap"`          // 日志配置
 	Https       Https                 `mapstructure:"https"        json:"https"        yaml:"https"`        // 网络配置
 	ElasticConf elastic.ElasticConfig `mapstructure:"elastic_conf" json:"elastic_conf" yaml:"elastic_conf"` // elastic配置
+	ChainNode   ChainNode             `mapstructure:"chain_node"   json:"chain_node"   yaml:"chain_node"`   // 链节点配置
 }
 
 type Zap struct {
@@ -27,4 +28,14 @@ type Zap struct {
 type Https struct {
 	IsHttps bool   `mapstructure:"is_https" json:"is_https" yaml:"is_https"` // 是否开启HTTPS
 	CaCert  string `mapstructure:"ca_cert"  json:"ca_cert"  yaml:"ca_cert"`  // 根证书路径
+}
+
+type ChainNode struct {
+	Ip          string            `mapstructure:"ip"              yaml:"ip"`           // IP地址 或 域名
+	Port        int               `mapstructure:"port"            yaml:"port"`         // 端口号
+	User        string            `mapstructure:"user"            yaml:"user"`         // 用户名
+	Password    string            `mapstructure:"password"        yaml:"password"`     // 密码
+	Net         string            `mapstructure:"net"             yaml:"net"`          // 网络类型
+	ChainConfig map[string]string `mapstructure:"chain_config"    yaml:"chain_config"` // 链配置
+	NodeJsUrl   string            `mapstructure:"node_js_url"      yaml:"node_js_url"` // 请求nodejs链接
 }
