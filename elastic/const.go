@@ -3,6 +3,7 @@ package elastic
 const (
 	// http method
 	HttpPost = "POST"
+	HttpPut  = "PUT"
 
 	// Index分类
 	InscribeInfoType = "inscription"

@@ -19,7 +19,7 @@ var (
 
 func main() {
 	fmt.Println("vim-go")
-	global.MysqlFlag = true
+	global.MysqlFlag = false
 	goBTC.MustLoad("./config.yml")
 	srv = global.Client
 	log = global.LOG
@@ -102,19 +102,19 @@ func GetBlockInfo(startHeight, newHigh int64) {
 			if res == nil {
 				continue
 			}
-			fmt.Printf("[%d] txHash: %s, [ord] : %v\n", j, txHash, res.ContentType)
+			logStr := fmt.Sprintf("[%d] txHash: %s, [ord] : %v\n", j, txHash, res.ContentType)
 			res.TxHaveInscribe = txHaveInscribe
 			// 保存铭文数据
 			err = ord.SaveInscribeInfoByTxInfo(i, res, txInfo)
 			if err != nil {
-				log.Error("SaveInscribeInfoByTxInfo", zap.Error(err))
+				log.Error("SaveInscribeInfoByTxInfo", zap.Any("tx", logStr), zap.Error(err))
 				continue
 			}
 			if res.Brc20 != nil && res.Brc20.P != "" {
 				// 保存BRC20铭文数据
 				err := ord.SaveInscribeBrc20ByTxInfo(i, res, txInfo)
 				if err != nil {
-					log.Error("SaveInscribeBrc20ByTxInfo", zap.Error(err))
+					log.Error("SaveInscribeBrc20ByTxInfo", zap.Any("tx", logStr), zap.Error(err))
 					continue
 				}
 				sumBrc20++
@@ -122,7 +122,7 @@ func GetBlockInfo(startHeight, newHigh int64) {
 			// 添加操作日志
 			err = ord.SaveInscribeActivity(oldTxid, res, txInfo)
 			if err != nil {
-				log.Error("CreateActivityInfo", zap.Any("oldTxid", oldTxid), zap.Error(err))
+				log.Error("CreateActivityInfo", zap.Any("tx", logStr), zap.Error(err))
 				return
 			}
 			sum++

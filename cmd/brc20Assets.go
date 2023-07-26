@@ -89,5 +89,11 @@ func GetHashInfo(txHash string, blockHeight int64) {
 			return
 		}
 	}
+	// 添加操作日志
+	err = ord.SaveInscribeActivity(oldTxid, res, txInfo)
+	if err != nil {
+		log.Error("CreateActivityInfo", zap.Any("oldTxid", oldTxid), zap.Error(err))
+		return
+	}
 	fmt.Println("[GetHashInfo] End")
 }
