@@ -50,8 +50,8 @@ type Error struct {
 }
 
 type SearchInfo struct {
-	From   string   `json:"from,omitempty"`
-	To     string   `json:"to,omitempty"`
+	From   int      `json:"from,omitempty"`
+	Size   int      `json:"size,omitempty"`
 	Source []string `json:"_source,omitempty"`
 	Query  *Query   `json:"query"`
 }

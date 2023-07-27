@@ -19,4 +19,5 @@ type OrdBRC20 struct {
 	Amt  string `json:"amt"`
 	Lim  string `json:"lim"`
 	Max  string `json:"max"`
+	Name string `json:"name"`
 }

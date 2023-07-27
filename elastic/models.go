@@ -47,3 +47,11 @@ type ActivityInfo struct {
 	To           string `json:"to"`
 	BlockTime    int64  `json:"block_time"`
 }
+
+type UserUTXO struct {
+	InscribeId string `json:"inscribe_id"`
+	Tick       string `json:"tick"`
+	Address    string `json:"address"`
+	vout       string `json:"vout"`
+	State      string `json:"state"`
+}

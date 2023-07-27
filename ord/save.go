@@ -90,6 +90,7 @@ func SaveInscribeBrc20ByTxInfo(blockHeight int64, res *models.OrdInscribeData, t
 
 func SaveInscribeActivity(txId string, res *models.OrdInscribeData, txInfo *btcjson.TxRawResult) error {
 	inscribeId := GetInscribeIdStr(txInfo.Txid)
+	txHash := txInfo.Txid
 	fromAddr := ""
 	toAddr := txInfo.Vout[0].ScriptPubKey.Address
 	activityType := ""
@@ -98,7 +99,7 @@ func SaveInscribeActivity(txId string, res *models.OrdInscribeData, txInfo *btcj
 		// 铭文ID不变
 		inscribeId = GetInscribeIdStr(txId)
 		// 铭文转移(普通交易)
-		inscribeInfo, err := elastic.GetDataById(elastic.InscribeInfoType, inscribeId)
+		inscribeInfo, err := elastic.GetDataById(elastic.InscribeInfoType, txId)
 		if err != nil {
 			return err
 		}
@@ -122,13 +123,13 @@ func SaveInscribeActivity(txId string, res *models.OrdInscribeData, txInfo *btcj
 	active := &elastic.ActivityInfo{
 		InscribeId:   inscribeId,
 		InscribeType: tokenType,
-		TxHash:       txInfo.Txid,
+		TxHash:       txHash,
 		ActivityType: activityType,
 		From:         fromAddr,
 		To:           toAddr,
 		BlockTime:    txInfo.Blocktime,
 	}
-	err := elastic.CreateData(elastic.ActivityType, inscribeId, active)
+	err := elastic.CreateData(elastic.ActivityType, txHash, active)
 	if err != nil {
 		return err
 	}

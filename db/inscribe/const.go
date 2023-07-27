@@ -2,8 +2,10 @@ package inscribe
 
 const (
 	// 表名
-	InscribeInfoName = "inscribe_info"
-	OrdTokenName     = "ord_tokens"
+	InscribeInfoName    = "inscribe_info"
+	OrdTokenName        = "ord_tokens"
+	Brc20AssetsName     = "brc20_assets"
+	UserBrc20AssetsName = "user_brc20_assets"
 )
 
 type OrdAction string
