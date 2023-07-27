@@ -19,7 +19,7 @@ var (
 
 func main() {
 	fmt.Println("vim-go")
-	global.MysqlFlag = false
+	// global.MysqlFlag = false
 	goBTC.MustLoad("./config.yml")
 	srv = global.Client
 	log = global.LOG
@@ -123,7 +123,7 @@ func GetBlockInfo(startHeight, newHigh int64) {
 			err = ord.SaveInscribeActivity(oldTxid, res, txInfo)
 			if err != nil {
 				log.Error("CreateActivityInfo", zap.Any("tx", logStr), zap.Error(err))
-				return
+				continue
 			}
 			sum++
 		}
