@@ -27,7 +27,10 @@ type UrlFilter struct {
 }
 
 func GetElasticUrl(filter UrlFilter) string {
-	url := elasticHost + "/" + filepath.Join(filter.Index, defaultType, filter.Id, filter.Action) + "?pretty"
+	if filter.Type == "" {
+		filter.Type = defaultType
+	}
+	url := elasticHost + "/" + filepath.Join(filter.Index, filter.Type, filter.Id, filter.Action) // + "?pretty"
 	// fmt.Printf("wch------ url: %+v\n", url)
 	return url
 }

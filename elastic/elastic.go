@@ -5,9 +5,9 @@ import "fmt"
 // 插入数据
 func CreateData(_index, _id string, _source interface{}) error {
 	filter := UrlFilter{
-		Index:  _index,
-		Id:     _id,
-		Action: "_create",
+		Index: _index,
+		Type:  "_create",
+		Id:    _id,
 	}
 	res := &HitsInfo{}
 	err := AskHttpJson(HttpPut, filter, _source, res)
