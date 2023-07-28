@@ -64,15 +64,8 @@ func GetBlockInfo(startHeight, newHigh int64) {
 		for j := 0; j < txInfoLength; j++ {
 			tx := blockInfo.Transactions[j]
 			txHash := tx.TxHash().String()
-			txInfo, err := srv.GetRawTransactionByHash(txHash)
-			if err != nil {
-				log.Error("GetRawTransactionByHash", zap.Any("txHash", txHash), zap.Error(err))
-				j--
-				continue
-			}
-			witnessStr := client.GetTxWitnessByTxInfo(txInfo)
+			witnessStr, oldTxid := client.GetWitnessAndTxHashByTxIn(tx)
 			// 判断该交易是否存在铭文流转
-			oldTxid := txInfo.Vin[0].Txid
 			txHaveInscribe, err := ord.GetInscribeIsExist(oldTxid)
 			if err != nil {
 				log.Info("GetInscribeIsExist", zap.Error(err))
@@ -82,6 +75,14 @@ func GetBlockInfo(startHeight, newHigh int64) {
 				if !txHaveInscribe {
 					continue
 				}
+			}
+			txInfo, err := srv.GetRawTransactionByHash(txHash)
+			if err != nil {
+				log.Error("GetRawTransactionByHash", zap.Any("txHash", txHash), zap.Error(err))
+				j--
+				continue
+			}
+			if witnessStr == "" {
 				var err error
 				// 添加操作日志
 				err = ord.SaveInscribeActivity(oldTxid, nil, txInfo)

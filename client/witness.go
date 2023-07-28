@@ -42,14 +42,20 @@ func GetTxWitness(tx *wire.MsgTx) string {
 	for _, input := range tx.TxIn {
 		// 判断输入是否包含WITNESS_V1_TAPROOT数据
 		if len(input.Witness) > 2 {
-			// fmt.Printf("wch---- input len(%v): %x\n", len(input.SignatureScript), input.SignatureScript)
-			// for _, data := range input.Witness {
-			// 	fmt.Printf("wch---- data: %x\n", data)
-			// }
 			return fmt.Sprintf("%x", input.Witness[1])
 		}
 	}
 	return ""
+}
+
+func GetWitnessAndTxHashByTxIn(tx *wire.MsgTx) (string, string) {
+	vin := tx.TxIn[0]
+	var witness string
+	if len(vin.Witness) > 2 {
+		witness = fmt.Sprintf("%x", vin.Witness[1])
+	}
+	txHash := vin.PreviousOutPoint.Hash.String()
+	return witness, txHash
 }
 
 // 解析Input Script inscribe
