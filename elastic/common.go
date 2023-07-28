@@ -43,7 +43,7 @@ func AskHttpJson(method string, filter UrlFilter, reqBody, respBody interface{})
 	if err != nil {
 		return err
 	}
-	// fmt.Printf("wch------ code: %+v, body: %+v\n", code, string(body))
+	// fmt.Printf("wch------ body: %+v\n", string(body))
 	err = json.Unmarshal(body, respBody)
 	if err != nil {
 		return err
@@ -57,7 +57,7 @@ func AskHttp(filter UrlFilter, respBody interface{}) error {
 	if err != nil {
 		return err
 	}
-	// fmt.Printf("wch------ code: %+v, body: %+v\n", code, string(body))
+	// fmt.Printf("wch------ body: %+v\n", string(body))
 	err = json.Unmarshal(body, respBody)
 	if err != nil {
 		return err

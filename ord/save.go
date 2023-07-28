@@ -99,7 +99,7 @@ func SaveInscribeActivity(txId string, res *models.OrdInscribeData, txInfo *btcj
 		// 铭文ID不变
 		inscribeId = GetInscribeIdStr(txId)
 		// 铭文转移(普通交易)
-		inscribeInfo, err := elastic.GetDataById(elastic.InscribeInfoType, txId)
+		inscribeInfo, err := elastic.GetDataById(elastic.InscribeInfoType, inscribeId)
 		if err != nil {
 			return err
 		}

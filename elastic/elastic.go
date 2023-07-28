@@ -20,9 +20,9 @@ func CreateData(_index, _id string, _source interface{}) error {
 // 修改数据
 func UpdateData(_index, _id string, _source interface{}) error {
 	filter := UrlFilter{
-		Index:  _index,
-		Id:     _id,
-		Action: "_update",
+		Index: _index,
+		Type:  "_update",
+		Id:    _id,
 	}
 	res := &HitsInfo{}
 	err := AskHttpJson(HttpPost, filter, _source, res)

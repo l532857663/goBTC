@@ -6,8 +6,7 @@ import (
 
 func GetInscribeIsExist(txId string) (bool, error) {
 	searchInfo := elastic.SearchInfo{
-		Source: []string{"owner_output"},
-		Query:  &elastic.Query{},
+		Query: &elastic.Query{},
 	}
 	searchInfo.Query.Match = make(map[string]interface{})
 	searchInfo.Query.Match["owner_output"] = txId

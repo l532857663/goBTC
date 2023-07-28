@@ -3,8 +3,8 @@ package elastic
 // 查询数据
 func GetDataByFilter(_index string, _query interface{}) (*BaseResp, error) {
 	filter := UrlFilter{
-		Index:  _index,
-		Action: "_search",
+		Index: _index,
+		Type:  "_search",
 	}
 	res := &BaseResp{}
 	err := AskHttpJson(HttpPost, filter, _query, res)

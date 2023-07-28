@@ -7,6 +7,7 @@ import (
 	"goBTC/global"
 	"goBTC/ord"
 	"goBTC/utils"
+	"time"
 
 	"go.uber.org/zap"
 )
@@ -123,4 +124,5 @@ func GetHashInfo(txHash string, blockHeight int64) {
 		return
 	}
 	fmt.Println("[GetHashInfo] End")
+	time.Sleep(1 * time.Second)
 }

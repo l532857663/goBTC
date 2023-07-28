@@ -14,10 +14,10 @@ type OrdInscribeData struct {
 
 type OrdBRC20 struct {
 	P    string `json:"p"`
-	OP   string `json:"op"`
-	Tick string `json:"tick"`
-	Amt  string `json:"amt"`
-	Lim  string `json:"lim"`
-	Max  string `json:"max"`
-	Name string `json:"name"`
+	OP   string `json:"op,omitempty"`
+	Tick string `json:"tick,omitempty"`
+	Amt  string `json:"amt,omitempty"`
+	Lim  string `json:"lim,omitempty"`
+	Max  string `json:"max,omitempty"`
+	Name string `json:"name,omitempty"`
 }
