@@ -22,3 +22,11 @@ func UpdateInscribeInfoOwner(txId string, txInfo *btcjson.TxRawResult) error {
 	}
 	return nil
 }
+
+func DeleteInscribeActivity(txId string) error {
+	err := elastic.DeleteData(elastic.ActivityType, txId, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}

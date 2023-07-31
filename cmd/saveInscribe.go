@@ -23,7 +23,8 @@ func main() {
 	goBTC.MustLoad("./config.yml")
 	srv = global.Client
 	log = global.LOG
-	GetInscribptionByTxhashAndHeight()
+	// GetInscribptionByTxhashAndHeight()
+	FixIncribeMoreTransferError()
 	if global.MysqlFlag {
 		utils.SignalHandler("brc20Assets", goBTC.Shutdown)
 	}
@@ -43,6 +44,23 @@ func GetInscribptionByTxhashAndHeight() {
 	}
 }
 
+func FixIncribeMoreTransferError() {
+	tmp := []string{
+		"d137417a11dfa300c57ac0e2e382f68dba1b14e6ab697eccbe5463b6c848fb8d",
+	}
+	for _, v := range tmp {
+		// 删除旧的Activity
+		err := ord.DeleteInscribeActivity(v)
+		if err != nil {
+			fmt.Printf("ord.DeleteInscribeActivity error: %+v, txHash: %+v\n", err, v)
+			continue
+		}
+		// 重新添加
+		GetHashInfo(v, 0)
+	}
+	fmt.Println("FixIncribeMoreTransferError END")
+}
+
 func GetHashInfo(txHash string, blockHeight int64) {
 	log.Info("[GetHashInfo] Start", zap.Any("txHash", txHash))
 	txInfo, err := srv.GetRawTransactionByHash(txHash)
@@ -58,14 +76,15 @@ func GetHashInfo(txHash string, blockHeight int64) {
 	if err != nil {
 		log.Info("GetInscribeIsExist", zap.Error(err))
 	}
-	// fmt.Printf("wch-----witnessStr: %+v, tx: %+v\n", len(witnessStr), txHaveInscribe)
+	fmt.Printf("wch-----witnessStr: %+v, tx: %+v\n", len(witnessStr), txHaveInscribe)
 	if witnessStr == "" {
-		if !txHaveInscribe {
+		if txHaveInscribe == "" {
 			log.Info("This tx not have inscription")
 			return
 		}
 		var err error
 		// 添加操作日志
+		oldTxid = txHaveInscribe
 		err = ord.SaveInscribeActivity(oldTxid, nil, txInfo)
 		if err != nil {
 			log.Error("CreateActivityInfo", zap.Any("oldTxid", oldTxid), zap.Error(err))
