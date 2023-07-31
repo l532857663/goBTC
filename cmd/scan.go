@@ -83,20 +83,19 @@ func GetBlockInfo(startHeight, newHigh int64) {
 				continue
 			}
 			if witnessStr == "" {
-				log.Info("Get have Inscribe transfer", zap.Any("txHaveInscribe", txHaveInscribe), zap.Any("txHash", txHash))
 				// 旧铭文ID是创建铭文的ID，非转移后的
 				oldTxid = txHaveInscribe
 				var err error
 				// 添加操作日志
 				err = ord.SaveInscribeActivity(oldTxid, nil, txInfo)
 				if err != nil {
-					log.Error("CreateActivityInfo", zap.Any("oldTxid", oldTxid), zap.Error(err))
+					log.Error("CreateActivityInfo", zap.Any("oldTxid", oldTxid), zap.Any("txHash", txHash), zap.Error(err))
 					continue
 				}
 				// 修改铭文拥有人
 				err = ord.UpdateInscribeInfoOwner(oldTxid, txInfo)
 				if err != nil {
-					log.Error("UpdateInscribeInfoOwner", zap.Any("oldTxid", oldTxid), zap.Error(err))
+					log.Error("UpdateInscribeInfoOwner", zap.Any("oldTxid", oldTxid), zap.Any("txHash", txHash), zap.Error(err))
 					continue
 				}
 				continue
