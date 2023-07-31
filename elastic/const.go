@@ -9,6 +9,8 @@ const (
 	InscribeInfoType = "inscription"
 	OrdTokenType     = "ordtoken"
 	ActivityType     = "activity"
+	DeployType       = "deploy"
+
 	// 铭文类型
 	InscribeTypeNFT   = "NFT"
 	InscribeTypeBRC20 = "BRC20"

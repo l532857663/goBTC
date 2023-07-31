@@ -28,7 +28,7 @@ func SaveInscribeInfoByTxInfo(blockHeight int64, res *models.OrdInscribeData, tx
 		}
 	}
 	// 判断铭文数据是否可用
-	if res.TxHaveInscribe {
+	if res.TxHaveInscribe != "" {
 		state = elastic.InscriptionStateInvalid
 	}
 
@@ -64,7 +64,7 @@ func SaveInscribeBrc20ByTxInfo(blockHeight int64, res *models.OrdInscribeData, t
 	action := res.Brc20.OP
 	// 判断铭文数据是否可用
 	state := elastic.InscriptionStatePending
-	if res.TxHaveInscribe {
+	if res.TxHaveInscribe != "" {
 		state = elastic.InscriptionStateInvalid
 	}
 

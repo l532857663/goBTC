@@ -4,7 +4,7 @@ import (
 	"goBTC/elastic"
 )
 
-func GetInscribeIsExist(txId string) (bool, error) {
+func GetInscribeIsExist(txId string) (string, error) {
 	searchInfo := elastic.SearchInfo{
 		Query: &elastic.Query{},
 	}
@@ -13,15 +13,15 @@ func GetInscribeIsExist(txId string) (bool, error) {
 
 	res, err := elastic.GetDataByFilter(elastic.InscribeInfoType, searchInfo)
 	if err != nil {
-		return false, err
+		return "", err
 	}
-	if res.Hits.Total.Value == 0 {
-		return false, nil
+	if res.Hits.Total.Value == 0 || len(res.Hits.Hits) == 0 {
+		return "", nil
 	}
-	return true, nil
+	return res.Hits.Hits[0].Id, nil
 }
 
-func GetUnSyncOrdToken() ([]elastic.HitsInfo, error) {
+func GetUnSyncOrdToken() (*elastic.Hits, error) {
 	searchInfo := elastic.SearchInfo{
 		Query: &elastic.Query{},
 	}
@@ -34,5 +34,5 @@ func GetUnSyncOrdToken() ([]elastic.HitsInfo, error) {
 	if res.Hits.Total.Value == 0 {
 		return nil, nil
 	}
-	return res.Hits.Hits, nil
+	return &res.Hits, nil
 }

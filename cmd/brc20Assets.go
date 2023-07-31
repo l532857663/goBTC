@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"goBTC"
 	"goBTC/client"
+	"goBTC/elastic"
 	"goBTC/global"
+	"goBTC/models"
 	"goBTC/ord"
 	"goBTC/utils"
 
@@ -34,7 +36,27 @@ func CheckBrc20Assets() {
 		global.LOG.Error("ord.GetUnSyncOrdToken", zap.Error(err))
 		return
 	}
-	for _, hit := range res {
-		fmt.Printf("wch----- hit: %+v\n", hit)
+	global.LOG.Info("GetUnSyncOrdToken", zap.Any("total", res.Total.Value))
+	for _, hit := range res.Hits {
+		ordToken := &elastic.OrdToken{}
+		err := utils.Map2Struct(hit.Source, ordToken)
+		if err != nil {
+			global.LOG.Error("The ord_token utils.Map2Struct error", zap.Any("index", hit.Index), zap.Any("id", hit.Id))
+			continue
+		}
+		brc20 := &models.OrdBRC20{}
+		err = utils.Map2Struct(ordToken.Brc20Info, brc20)
+		if err != nil {
+			global.LOG.Error("The brc20 utils.Map2Struct error", zap.Any("index", hit.Index), zap.Any("id", hit.Id), zap.Any("info", ordToken.Brc20Info), zap.Error(err))
+			continue
+		}
+		if brc20.P != "brc-20" {
+			continue
+		}
+		err = ord.DealWithBrc20Info(ordToken, brc20)
+		if err != nil {
+			global.LOG.Error("ord.DealWithBrc20Info error", zap.Any("index", hit.Index), zap.Any("id", hit.Id), zap.Any("info", ordToken.Brc20Info), zap.Error(err))
+			continue
+		}
 	}
 }
