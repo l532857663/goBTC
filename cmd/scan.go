@@ -83,6 +83,7 @@ func GetBlockInfo(startHeight, newHigh int64) {
 				continue
 			}
 			if witnessStr == "" {
+				log.Info("Get have Inscribe transfer", zap.Any("txHaveInscribe", txHaveInscribe), zap.Any("txHash", txHash))
 				var err error
 				// 添加操作日志
 				err = ord.SaveInscribeActivity(oldTxid, nil, txInfo)

@@ -147,7 +147,7 @@ func GetScriptString(data string) *models.OrdInscribeData {
 		} else {
 			opCode := char[i]
 			if opCode == 0x68 {
-				fmt.Println("End!")
+				// fmt.Println("End!")
 				break
 			}
 			fmt.Printf("End?: %x, %s, [%s]\n", opCode, string(opCode), BTCScriptValueMap[opCode])
