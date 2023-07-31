@@ -38,7 +38,10 @@ func GetElasticUrl(filter UrlFilter) string {
 
 func AskHttpJson(method string, filter UrlFilter, reqBody, respBody interface{}) error {
 	url := GetElasticUrl(filter)
-	content, _ := json.Marshal(reqBody)
+	var content []byte
+	if reqBody != nil {
+		content, _ = json.Marshal(reqBody)
+	}
 	fmt.Printf("wch------ askContent: %+v\n", string(content))
 	_, body, err := http.HttpByJson(method, url, username, password, content)
 	if err != nil {

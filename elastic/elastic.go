@@ -36,7 +36,7 @@ func UpdateData(_index, _id string, _source interface{}) error {
 func DeleteData(_index, _id string, _source interface{}) error {
 	filter := UrlFilter{
 		Index: _index,
-		Id:    "_delete_by_query",
+		Id:    _id,
 	}
 	res := &BaseResp{}
 	err := AskHttpJson(HttpDelete, filter, _source, res)
