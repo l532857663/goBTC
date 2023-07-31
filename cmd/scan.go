@@ -84,18 +84,17 @@ func GetBlockInfo(startHeight, newHigh int64) {
 			}
 			if witnessStr == "" {
 				// 旧铭文ID是创建铭文的ID，非转移后的
-				oldTxid = txHaveInscribe
 				var err error
 				// 添加操作日志
-				err = ord.SaveInscribeActivity(oldTxid, nil, txInfo)
+				err = ord.SaveInscribeActivity(txHaveInscribe, nil, txInfo)
 				if err != nil {
-					log.Error("CreateActivityInfo", zap.Any("oldTxid", oldTxid), zap.Any("txHash", txHash), zap.Error(err))
+					log.Error("CreateActivityInfo", zap.Any("txHaveInscribe", txHaveInscribe), zap.Any("txHash", txHash), zap.Error(err))
 					continue
 				}
 				// 修改铭文拥有人
-				err = ord.UpdateInscribeInfoOwner(oldTxid, txInfo)
+				err = ord.UpdateInscribeInfoOwner(txHaveInscribe, txInfo)
 				if err != nil {
-					log.Error("UpdateInscribeInfoOwner", zap.Any("oldTxid", oldTxid), zap.Any("txHash", txHash), zap.Error(err))
+					log.Error("UpdateInscribeInfoOwner", zap.Any("txHaveInscribe", txHaveInscribe), zap.Any("txHash", txHash), zap.Error(err))
 					continue
 				}
 				continue
@@ -123,7 +122,7 @@ func GetBlockInfo(startHeight, newHigh int64) {
 				sumBrc20++
 			}
 			// 添加操作日志
-			err = ord.SaveInscribeActivity(oldTxid, res, txInfo)
+			err = ord.SaveInscribeActivity(txHaveInscribe, res, txInfo)
 			if err != nil {
 				log.Error("CreateActivityInfo", zap.Any("tx", logStr), zap.Error(err))
 				continue

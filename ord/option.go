@@ -6,11 +6,10 @@ import (
 	"github.com/btcsuite/btcd/btcjson"
 )
 
-func UpdateInscribeInfoOwner(txId string, txInfo *btcjson.TxRawResult) error {
+func UpdateInscribeInfoOwner(esId string, txInfo *btcjson.TxRawResult) error {
 	// 处理数据
 	addr := txInfo.Vout[0].ScriptPubKey.Address
 	vout := GetInscribeOutputStr(txInfo.Txid)
-	esId := GetInscribeIdStr(txId)
 
 	updateInfo := elastic.UpdateInfo{}
 	updateInfo.Doc = make(map[string]interface{})

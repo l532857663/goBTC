@@ -47,6 +47,9 @@ func GetInscribptionByTxhashAndHeight() {
 func FixIncribeMoreTransferError() {
 	tmp := []string{
 		"d137417a11dfa300c57ac0e2e382f68dba1b14e6ab697eccbe5463b6c848fb8d",
+		"18403eef89b824fbb4de5a1a3b5dad2f78b6e5ff67086308c94d59f7da5e1675",
+		"156a787e50ef1b912830ca1f495fbb2032a159d477844aa84dd63f777bb4db33",
+		"de1c1bacf4311067ab547a658afe47dbaf361423e62695bff4d5eac2a4124c9e",
 	}
 	for _, v := range tmp {
 		// 删除旧的Activity
@@ -84,16 +87,15 @@ func GetHashInfo(txHash string, blockHeight int64) {
 		}
 		var err error
 		// 添加操作日志
-		oldTxid = txHaveInscribe
-		err = ord.SaveInscribeActivity(oldTxid, nil, txInfo)
+		err = ord.SaveInscribeActivity(txHaveInscribe, nil, txInfo)
 		if err != nil {
-			log.Error("CreateActivityInfo", zap.Any("oldTxid", oldTxid), zap.Error(err))
+			log.Error("CreateActivityInfo", zap.Any("txHaveInscribe", txHaveInscribe), zap.Error(err))
 			return
 		}
 		// 修改铭文拥有人
-		err = ord.UpdateInscribeInfoOwner(oldTxid, txInfo)
+		err = ord.UpdateInscribeInfoOwner(txHaveInscribe, txInfo)
 		if err != nil {
-			log.Error("UpdateInscribeInfoOwner", zap.Any("oldTxid", oldTxid), zap.Error(err))
+			log.Error("UpdateInscribeInfoOwner", zap.Any("txHaveInscribe", txHaveInscribe), zap.Error(err))
 			return
 		}
 		return
@@ -117,9 +119,9 @@ func GetHashInfo(txHash string, blockHeight int64) {
 		}
 	}
 	// 添加操作日志
-	err = ord.SaveInscribeActivity(oldTxid, res, txInfo)
+	err = ord.SaveInscribeActivity(txHaveInscribe, res, txInfo)
 	if err != nil {
-		log.Error("CreateActivityInfo", zap.Any("oldTxid", oldTxid), zap.Error(err))
+		log.Error("CreateActivityInfo", zap.Any("txHaveInscribe", txHaveInscribe), zap.Error(err))
 		return
 	}
 	fmt.Println("[GetHashInfo] End")
