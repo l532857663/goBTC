@@ -24,7 +24,10 @@ func UpdateInscribeInfoOwner(txId string, txInfo *btcjson.TxRawResult) error {
 }
 
 func DeleteInscribeActivity(txId string) error {
-	err := elastic.DeleteData(elastic.ActivityType, txId, nil)
+	updateInfo := elastic.Query{}
+	searchInfo.Match = make(map[string]interface{})
+	searchInfo.Match["tx_hash"] = txId
+	err := elastic.DeleteData(elastic.ActivityType, txId, updateInfo)
 	if err != nil {
 		return err
 	}

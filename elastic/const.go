@@ -2,8 +2,9 @@ package elastic
 
 const (
 	// http method
-	HttpPost = "POST"
-	HttpPut  = "PUT"
+	HttpPost   = "POST"
+	HttpPut    = "PUT"
+	HttpDelete = "DELETE"
 
 	// Index分类
 	InscribeInfoType = "inscription"
