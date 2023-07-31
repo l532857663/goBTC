@@ -6,11 +6,12 @@ import "fmt"
 func CreateData(_index, _id string, _source interface{}) error {
 	filter := UrlFilter{
 		Index: _index,
-		Type:  "_create",
-		Id:    _id,
+		// Type:  "_create",
+		Id: _id,
 	}
 	res := &HitsInfo{}
-	err := AskHttpJson(HttpPut, filter, _source, res)
+	// err := AskHttpJson(HttpPut, filter, _source, res)
+	err := AskHttpJson(HttpPost, filter, _source, res)
 	if res.Error != nil {
 		return fmt.Errorf("CreateData error: [%s]%s", res.Error.Type, res.Error.Reason)
 	}
