@@ -2,7 +2,6 @@ package elastic
 
 import (
 	"encoding/json"
-	"fmt"
 	"goBTC/utils/http"
 	"path/filepath"
 )
@@ -42,12 +41,12 @@ func AskHttpJson(method string, filter UrlFilter, reqBody, respBody interface{})
 	if reqBody != nil {
 		content, _ = json.Marshal(reqBody)
 	}
-	fmt.Printf("wch------ askContent: %+v\n", string(content))
+	// fmt.Printf("wch------ askContent: %+v\n", string(content))
 	_, body, err := http.HttpByJson(method, url, username, password, content)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("wch------ body: %+v\n", string(body))
+	// fmt.Printf("wch------ body: %+v\n", string(body))
 	err = json.Unmarshal(body, respBody)
 	if err != nil {
 		return err
