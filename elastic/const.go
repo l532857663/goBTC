@@ -33,4 +33,9 @@ const (
 	ActivityActionNew      = "New inscription"
 	ActivityActionReceived = "Received"
 	ActivityActionSent     = "Sent"
+
+	// TokenMintedState
+	TokenMintedInit     = "init"
+	TOkenMintedProgress = "progress"
+	TokenMintedComplete = "complete"
 )

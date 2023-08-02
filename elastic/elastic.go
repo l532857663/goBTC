@@ -18,6 +18,21 @@ func CreateData(_index, _id string, _source interface{}) error {
 	return err
 }
 
+// 插入数据(已存在则失败)
+func CreateDataByPut(_index, _id string, _source interface{}) error {
+	filter := UrlFilter{
+		Index: _index,
+		Type:  "_create",
+		Id:    _id,
+	}
+	res := &HitsInfo{}
+	err := AskHttpJson(HttpPut, filter, _source, res)
+	if res.Error != nil {
+		return fmt.Errorf("CreateDataByPut error: [%s]%s", res.Error.Type, res.Error.Reason)
+	}
+	return err
+}
+
 // 修改数据
 func UpdateData(_index, _id string, _source interface{}) error {
 	filter := UrlFilter{

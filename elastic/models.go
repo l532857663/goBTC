@@ -55,3 +55,15 @@ type UserUTXO struct {
 	vout       string `json:"vout"`
 	State      string `json:"state"`
 }
+
+type DeployToken struct {
+	InscribeId string `json:"inscribe_id"`
+	TxHash     string `json:"tx_hash"`
+	Tick       string `json:"tick"`
+	Lim        string `json:"lim"`
+	Max        string `json:"max"`
+	DeployAddr string `json:"deploy_addr"`
+	DeployTime int64  `json:"deploy_time"`
+	Minted     string `json:"minted"`
+	State      string `json:"state"`
+}

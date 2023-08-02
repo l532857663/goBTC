@@ -27,7 +27,7 @@ func GetUnSyncOrdToken() (*elastic.Hits, error) {
 	}
 	searchInfo.Query.Match = make(map[string]interface{})
 	searchInfo.Query.Match["sync_state"] = elastic.StateSyncIsFalse
-	res, err := elastic.GetDataByFilter(elastic.InscribeInfoType, searchInfo)
+	res, err := elastic.GetDataByFilter(elastic.OrdTokenType, searchInfo)
 	if err != nil {
 		return nil, err
 	}

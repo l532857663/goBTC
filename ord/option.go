@@ -29,3 +29,27 @@ func DeleteInscribeActivity(txId string) error {
 	}
 	return nil
 }
+
+func UpdateOrdTokenState(esId, state string) error {
+	// 处理数据
+	updateInfo := elastic.UpdateInfo{}
+	updateInfo.Doc = make(map[string]interface{})
+	updateInfo.Doc["state"] = state
+	updateInfo.Doc["sync_state"] = elastic.StateSyncIsTrue
+	err := elastic.UpdateData(elastic.OrdTokenType, esId, updateInfo)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func UpdateDeployTokenInfo(esId string, info map[string]interface{}) error {
+	// 处理数据
+	updateInfo := elastic.UpdateInfo{}
+	updateInfo.Doc = info
+	err := elastic.UpdateData(elastic.DeployType, esId, updateInfo)
+	if err != nil {
+		return err
+	}
+	return nil
+}
