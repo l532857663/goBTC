@@ -1,6 +1,7 @@
 package ord
 
 import (
+	"fmt"
 	"goBTC/elastic"
 )
 
@@ -35,4 +36,29 @@ func GetUnSyncOrdToken() (*elastic.Hits, error) {
 		return nil, nil
 	}
 	return &res.Hits, nil
+}
+
+func GetBalanceInfo(esIndex string, pageFrom, pageSize int, filter map[string]interface{}) ([]interface{}, error) {
+	fmt.Printf("wch---- filter: %+v\n", filter)
+	searchInfo := elastic.SearchInfo{
+		From: pageFrom,
+		Size: pageSize,
+		Query: &elastic.Query{
+			Match: filter,
+		},
+	}
+
+	res, err := elastic.GetDataByFilter(esIndex, searchInfo)
+	if err != nil {
+		return nil, err
+	}
+	if res.Hits.Total.Value == 0 || len(res.Hits.Hits) == 0 {
+		return nil, nil
+	}
+	fmt.Printf("wch----- res: %+v\n", res.Hits.Total.Value)
+	var list []interface{}
+	for _, info := range res.Hits.Hits {
+		list = append(list, info.Source)
+	}
+	return list, nil
 }

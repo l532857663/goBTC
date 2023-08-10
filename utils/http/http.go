@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"crypto/x509"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -90,4 +91,32 @@ func HttpGet(url, user, passwd string) (int, []byte, error) {
 		return 0, nil, err
 	}
 	return resp.StatusCode, body, nil
+}
+
+func HttpGetWithHeader(url string, header map[string]string) (code int, body string, err error) {
+	// 构造请求
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return 0, "", errors.New("New req failed!")
+	}
+	// 添加header
+	if len(header) > 0 {
+		for k, v := range header {
+			req.Header.Add(k, v)
+		}
+	}
+
+	// 发送http请求
+	response, err := httpClient.Do(req)
+	if err != nil {
+		return 0, "", err
+	}
+	defer response.Body.Close()
+
+	// 读取返回body内容
+	bytess, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return 0, "", err
+	}
+	return response.StatusCode, string(bytess), nil
 }

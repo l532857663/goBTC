@@ -7,8 +7,6 @@ import (
 	"goBTC/global"
 	"goBTC/models"
 	"goBTC/utils"
-	"log"
-	"net/http"
 )
 
 var srv *client.BTCClient
@@ -20,7 +18,6 @@ func main() {
 	// GetBlockInfoByHash()
 	// SignTx()
 	GetWitness()
-	// GetInscribeHttp()
 	if global.MysqlFlag {
 		utils.SignalHandler("main", goBTC.Shutdown)
 	}
@@ -68,13 +65,6 @@ func GetWitnessResByHash(hash string) (string, error) {
 	return resList.Body, nil
 }
 
-func GetInscribeHttp() {
-	http.HandleFunc("/webp", webpHandler)
-
-	fmt.Println("Web listen port: 4396")
-	log.Fatal(http.ListenAndServe(":4396", nil))
-}
-
 func GetWitness() {
 	// hash := "7fb631b7ed420c07b546ee4db8527a9523bbc44961f9983430166988cd6beeeb" // TEXT_1
 	// hash := "bdbf2d7e385f650cbcba9a0ae83dc3f466dadc1e48732835e977cfefe2710b42" // TEXT_2
@@ -108,57 +98,4 @@ func SignTx() {
 		fmt.Printf("wch---- err: %+v\n", err)
 		return
 	}
-}
-
-func webpHandler(w http.ResponseWriter, r *http.Request) {
-	//// // var buf bytes.Buffer
-	//// var width, height int
-	//// // var data []byte
-	//// var err error
-	//// hash := "ff4d5e838adfe81c8486ed8630be945badf9a5e75d07262f9d56964eba6ca032" // IMAGE_1
-	//// res, err := GetWitnessResByHash(hash)
-	//// if err != nil {
-	//// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-	//// 	return
-	//// }
-	//// data, err := hex.DecodeString(res)
-	//// if err != nil {
-	//// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-	//// 	return
-	//// }
-
-	//// // GetInfo
-	//// if width, height, _, err = webp.GetInfo(data); err != nil {
-	//// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-	//// 	return
-	//// }
-	//// fmt.Printf("width = %d, height = %d\n", width, height)
-
-	//// // GetMetadata
-	//// if metadata, err := webp.GetMetadata(data, "ICCP"); err != nil {
-	//// 	fmt.Printf("Metadata: err = %v\n", err)
-	//// } else {
-	//// 	fmt.Printf("Metadata: %s\n", string(metadata))
-	//// }
-
-	//// // Decode webp
-	//// img, err := webp.Decode(bytes.NewReader(data))
-	//// if err != nil {
-	//// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-	//// 	return
-	//// }
-	//// if err := png.Encode(w, img); err != nil {
-	//// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-	//// 	return
-	//// }
-
-	// // Encode lossless webp
-	// if err = webp.Encode(&buf, m, &webp.Options{Lossless: true}); err != nil {
-	// 	log.Println(err)
-	// }
-	// if err = ioutil.WriteFile("output.webp", buf.Bytes(), 0666); err != nil {
-	// 	log.Println(err)
-	// }
-
-	fmt.Println("Save output.webp ok")
 }
