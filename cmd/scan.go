@@ -66,8 +66,12 @@ func GetBlockInfo(startHeight, newHigh int64) {
 		sum, sumBrc20 := new(int), new(int)
 		for j := 0; j < txInfoLength; j++ {
 			wg.Add(1)
+			if j%100 == 0 {
+				time.Sleep(1 * time.Second)
+			}
 			go GetOneTxInfo(blockInfo, sum, sumBrc20, i, j, j)
 		}
+		wg.Wait()
 		eTime := time.Now().Unix()
 		log.Info("Get block", zap.Any("all time", eTime-endTime))
 		log.Info("the block get inscribe:", zap.Any("sum", sum), zap.Any("sumBrc20", sumBrc20))
@@ -76,14 +80,14 @@ func GetBlockInfo(startHeight, newHigh int64) {
 }
 
 func GetOneTxInfo(blockInfo *wire.MsgBlock, sum, sumBrc20 *int, i int64, j, flag int) {
+	tx := blockInfo.Transactions[j]
+	txHash := tx.TxHash().String()
 	defer func() {
 		wg.Done()
 		if r := recover(); r != nil {
-			log.Error("panic error", zap.Any("err", r))
+			log.Error("panic error", zap.Any("err", r), zap.Any("j", j), zap.Any("txHash", txHash))
 		}
 	}()
-	tx := blockInfo.Transactions[j]
-	txHash := tx.TxHash().String()
 	witnessStr, oldTxid := client.GetWitnessAndTxHashByTxIn(tx)
 	// 判断该交易是否存在铭文流转
 	txHaveInscribe, err := ord.GetInscribeIsExist(oldTxid)
