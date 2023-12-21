@@ -22,7 +22,7 @@ func InitHttps(httpsFlage bool, caCertPath string) {
 	timeout := 100 * time.Second
 	transport := &http.Transport{
 		// 设置为短连接请求模式
-		DisableKeepAlives: true,
+		DisableKeepAlives: false,
 	}
 	if isHttps {
 		// 读取根证书文件

@@ -26,7 +26,8 @@ func main() {
 	goBTC.MustLoad("./config.yml")
 	srv = global.Client
 	log = global.LOG
-	go CheckNewHeight(805103)
+	go CheckNewHeight(789792)
+	// TestGetTx()
 	utils.SignalHandler("scan", goBTC.Shutdown)
 }
 
@@ -35,7 +36,7 @@ func CheckNewHeight(startHeight int64) {
 	for {
 		newHigh, err := srv.GetBlockCount()
 		if err != nil {
-			fmt.Printf("GetBlockCount error: %+v\n", err)
+			log.Error("GetBlockCount error", zap.Error(err))
 			return
 		}
 		if startHeight > newHigh {
@@ -67,7 +68,7 @@ func GetBlockInfo(startHeight, newHigh int64) {
 		for j := 0; j < txInfoLength; j++ {
 			wg.Add(1)
 			if j%100 == 0 {
-				time.Sleep(1 * time.Second)
+				time.Sleep(2 * time.Second)
 			}
 			go GetOneTxInfo(blockInfo, sum, sumBrc20, i, j, j)
 		}
@@ -76,7 +77,7 @@ func GetBlockInfo(startHeight, newHigh int64) {
 		log.Info("Get block", zap.Any("all time", eTime-endTime))
 		log.Info("the block get inscribe:", zap.Any("sum", sum), zap.Any("sumBrc20", sumBrc20))
 	}
-	fmt.Println("[GetBlockInfo] End")
+	log.Info("[GetBlockInfo] End")
 }
 
 func GetOneTxInfo(blockInfo *wire.MsgBlock, sum, sumBrc20 *int, i int64, j, flag int) {
@@ -88,13 +89,25 @@ func GetOneTxInfo(blockInfo *wire.MsgBlock, sum, sumBrc20 *int, i int64, j, flag
 			log.Error("panic error", zap.Any("err", r), zap.Any("j", j), zap.Any("txHash", txHash))
 		}
 	}()
-	witnessStr, oldTxid := client.GetWitnessAndTxHashByTxIn(tx)
+	witnessStr := client.GetWitnessByTxInFor0(tx)
 	// 判断该交易是否存在铭文流转
-	txHaveInscribe, err := ord.GetInscribeIsExist(oldTxid)
-	if err != nil {
-		log.Info("GetInscribeIsExist", zap.Error(err))
+	txHaveInscribe, oldTxid := "", ""
+	var inscribeIndex int
+	for i, vin := range tx.TxIn {
+		output := ""
+		oldTxid, output = client.GetVinHashAndOutput(vin.PreviousOutPoint)
+		var err error
+		txHaveInscribe, err = ord.GetInscribeIsExist(oldTxid, output)
+		if err != nil {
+			log.Info("GetInscribeIsExist", zap.Error(err), zap.Any("oldTxid", oldTxid))
+			continue
+		}
+		if txHaveInscribe != "" {
+			// 获取到铭文信息
+			inscribeIndex = i
+			break
+		}
 	}
-	// log.Info("Get tx", zap.Any("txHash", txHash), zap.Any("witness len", len(witnessStr)), zap.Any("txHaveInscribe", txHaveInscribe))
 	if witnessStr == "" {
 		if txHaveInscribe == "" {
 			return
@@ -108,11 +121,19 @@ func GetOneTxInfo(blockInfo *wire.MsgBlock, sum, sumBrc20 *int, i int64, j, flag
 		}
 		return
 	}
+	toAddr := txInfo.Vout[0].ScriptPubKey.Address
 	if witnessStr == "" {
 		// 旧铭文ID是创建铭文的ID，非转移后的
 		var err error
+		// 查询转移铭文的输出地址
+		toAddrIndex := GetInscribeToAddrByRawTx(tx, inscribeIndex)
+		if toAddrIndex == nil {
+			return
+		}
+		toAddr = txInfo.Vout[*toAddrIndex].ScriptPubKey.Address
+		log.Info("Get inscribe deal", zap.Any("txHaveInscribe", txHaveInscribe), zap.Any("oldTxid", oldTxid), zap.Any("txHash", txHash), zap.Any("toAddr", toAddr), zap.Any("j", j))
 		// 添加操作日志
-		err = ord.SaveInscribeActivity(txHaveInscribe, nil, txInfo)
+		err = ord.SaveInscribeActivity(txHaveInscribe, toAddr, nil, txInfo)
 		if err != nil {
 			log.Error("CreateActivityInfo", zap.Any("txHaveInscribe", txHaveInscribe), zap.Any("txHash", txHash), zap.Error(err))
 			return
@@ -130,6 +151,7 @@ func GetOneTxInfo(blockInfo *wire.MsgBlock, sum, sumBrc20 *int, i int64, j, flag
 	if res == nil {
 		return
 	}
+	log.Info("Get inscribe new", zap.Any("txHaveInscribe", txHaveInscribe), zap.Any("oldTxid", oldTxid), zap.Any("txHash", txHash), zap.Any("j", j))
 	logStr := fmt.Sprintf("[%d] txHash: %s, [ord] : %v\n", j, txHash, res.ContentType)
 	res.TxHaveInscribe = txHaveInscribe
 	// 保存铭文数据
@@ -148,10 +170,61 @@ func GetOneTxInfo(blockInfo *wire.MsgBlock, sum, sumBrc20 *int, i int64, j, flag
 		*sumBrc20++
 	}
 	// 添加操作日志
-	err = ord.SaveInscribeActivity(txHaveInscribe, res, txInfo)
+	err = ord.SaveInscribeActivity(txHaveInscribe, toAddr, res, txInfo)
 	if err != nil {
 		log.Error("CreateActivityInfo", zap.Any("tx", logStr), zap.Error(err))
 		return
 	}
 	*sum++
+}
+
+func GetInscribeToAddrByRawTx(tx *wire.MsgTx, inscribeIn int) *int {
+	// 根据铭文输入的位置，定位铭文输出的位置(通过ordi规则，sat位置匹配原则)
+	var inSum int64 = 0
+	var fromAddrIndex int
+	for i, vin := range tx.TxIn {
+		fromAddrIndex = i
+		if i == inscribeIn {
+			break
+		}
+		txInfo, err := srv.Client.GetRawTransaction(&vin.PreviousOutPoint.Hash)
+		if err != nil {
+			log.Error("GetRawTransaction error", zap.Error(err), zap.Any("txHash", tx.TxHash().String()))
+			return nil
+		}
+		inSum += txInfo.MsgTx().TxOut[vin.PreviousOutPoint.Index].Value
+	}
+	var outSum int64 = 0
+	var toAddrIndex int
+	for i, vout := range tx.TxOut {
+		outSum += vout.Value
+		if outSum > inSum {
+			toAddrIndex = i
+			break
+		}
+	}
+	if fromAddrIndex != 0 && toAddrIndex == 0 {
+		log.Error("GetInscribeToAddrByRawTx error", zap.Any("txHash", tx.TxHash().String()))
+		return nil
+	}
+	return &toAddrIndex
+}
+
+func TestGetTx() {
+	fmt.Printf("wch------ test\n")
+	blockList := []int64{788344, 789649, 789792, 789793}
+	txList := []int{2826, 2398, 1653, 309}
+	for index, i := range blockList {
+		blockInfo, err := srv.GetBlockInfoByHeight(i)
+		if err != nil {
+			log.Error("GetBlockInfoByHash", zap.Error(err))
+			return
+		}
+		fmt.Printf("wch------ test1\n")
+		sum, sumBrc20 := new(int), new(int)
+		j := txList[index]
+		wg.Add(1)
+		GetOneTxInfo(blockInfo, sum, sumBrc20, i, j, j)
+		fmt.Printf("wch------ END\n")
+	}
 }

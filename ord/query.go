@@ -1,11 +1,11 @@
 package ord
 
 import (
-	"fmt"
 	"goBTC/elastic"
+	"goBTC/utils"
 )
 
-func GetInscribeIsExist(txId string) (string, error) {
+func GetInscribeIsExist(txId, output string) (string, error) {
 	searchInfo := elastic.SearchInfo{
 		Query: &elastic.Query{},
 	}
@@ -19,7 +19,18 @@ func GetInscribeIsExist(txId string) (string, error) {
 	if res.Hits.Total.Value == 0 || len(res.Hits.Hits) == 0 {
 		return "", nil
 	}
-	return res.Hits.Hits[0].Id, nil
+	// 判断outout内容
+	for _, hit := range res.Hits.Hits {
+		info := &elastic.InscribeInfo{}
+		err = utils.Map2Struct(hit.Source, info)
+		if err != nil {
+			return "", nil
+		}
+		if info.OwnerOutput == output {
+			return hit.Id, nil
+		}
+	}
+	return "", nil
 }
 
 func GetUnSyncOrdToken() (*elastic.Hits, error) {
@@ -39,7 +50,6 @@ func GetUnSyncOrdToken() (*elastic.Hits, error) {
 }
 
 func GetBalanceInfo(esIndex string, pageFrom, pageSize int, filter map[string]interface{}) ([]interface{}, error) {
-	fmt.Printf("wch---- filter: %+v\n", filter)
 	searchInfo := elastic.SearchInfo{
 		From: pageFrom,
 		Size: pageSize,
@@ -55,7 +65,6 @@ func GetBalanceInfo(esIndex string, pageFrom, pageSize int, filter map[string]in
 	if res.Hits.Total.Value == 0 || len(res.Hits.Hits) == 0 {
 		return nil, nil
 	}
-	fmt.Printf("wch----- res: %+v\n", res.Hits.Total.Value)
 	var list []interface{}
 	for _, info := range res.Hits.Hits {
 		list = append(list, info.Source)

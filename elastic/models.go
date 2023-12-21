@@ -39,13 +39,15 @@ type OrdToken struct {
 }
 
 type ActivityInfo struct {
-	InscribeId   string `json:"inscribe_id"`
-	InscribeType string `json:"inscribe_type"`
-	TxHash       string `json:"tx_hash"`
-	ActivityType string `json:"activity_type"`
-	From         string `json:"from"`
-	To           string `json:"to"`
-	BlockTime    int64  `json:"block_time"`
+	InscribeId     string `json:"inscribe_id"`
+	InscribeType   string `json:"inscribe_type"`
+	TxHash         string `json:"tx_hash"`
+	ActivityType   string `json:"activity_type"`
+	ActivityAction string `json:"activity_action"`
+	Owner          string `json:"owner"`
+	From           string `json:"from"`
+	To             string `json:"to"`
+	BlockTime      int64  `json:"block_time"`
 }
 
 type UserUTXO struct {

@@ -88,13 +88,15 @@ func SaveInscribeBrc20ByTxInfo(blockHeight int64, res *models.OrdInscribeData, t
 	return nil
 }
 
-func SaveInscribeActivity(esId string, res *models.OrdInscribeData, txInfo *btcjson.TxRawResult) error {
+func SaveInscribeActivity(esId, toAddr string, res *models.OrdInscribeData, txInfo *btcjson.TxRawResult) error {
 	inscribeId := GetInscribeIdStr(txInfo.Txid)
 	txHash := txInfo.Txid
 	fromAddr := ""
-	toAddr := txInfo.Vout[0].ScriptPubKey.Address
+	owner := ""
 	activityType := ""
+	activityAction := ""
 	tokenType := ""
+	var receiveInfo *elastic.ActivityInfo
 	if res == nil {
 		// 铭文ID不变
 		inscribeId = esId
@@ -110,28 +112,56 @@ func SaveInscribeActivity(esId string, res *models.OrdInscribeData, txInfo *btcj
 		}
 		// 获取相应的数据
 		fromAddr = info.OwnerAddress
+		owner = info.OwnerAddress
 		activityType = elastic.ActivityTypeTransfer
+		activityAction = elastic.ActivityActionSend
 		tokenType = info.InscribeType
+		// 生成对应的接收数据
+		receiveInfo = &elastic.ActivityInfo{
+			Owner:          toAddr,
+			ActivityAction: elastic.ActivityActionReceive,
+		}
 	} else {
 		// 铭文操作(铭文交易)
 		activityType = elastic.ActivityTypeInscribed
+		activityAction = elastic.ActivityActionMint
 		tokenType = elastic.InscribeTypeNFT
+		owner = txInfo.Vout[0].ScriptPubKey.Address
 		if res.Brc20 != nil {
 			tokenType = elastic.InscribeTypeBRC20
+			// BRC20的操作还有 deploy、transfer
+			if res.Brc20.OP == elastic.ActivityActionDeploy {
+				activityAction = elastic.ActivityActionDeploy
+			} else if res.Brc20.OP == elastic.ActivityActionTransfer {
+				activityAction = elastic.ActivityActionTransfer
+			}
 		}
 	}
 	active := &elastic.ActivityInfo{
-		InscribeId:   inscribeId,
-		InscribeType: tokenType,
-		TxHash:       txHash,
-		ActivityType: activityType,
-		From:         fromAddr,
-		To:           toAddr,
-		BlockTime:    txInfo.Blocktime,
+		InscribeId:     inscribeId,
+		InscribeType:   tokenType,
+		TxHash:         txHash,
+		ActivityType:   activityType,
+		ActivityAction: activityAction,
+		Owner:          owner,
+		From:           fromAddr,
+		To:             toAddr,
+		BlockTime:      txInfo.Blocktime,
 	}
-	err := elastic.CreateData(elastic.ActivityType, txHash, active)
+	esId = txHash + "_" + active.ActivityAction
+	err := elastic.CreateData(elastic.ActivityType, esId, active)
 	if err != nil {
 		return err
+	}
+	// 创建对应的接收数据
+	if res == nil && receiveInfo != nil {
+		active.ActivityAction = receiveInfo.ActivityAction
+		active.Owner = receiveInfo.Owner
+		esId = txHash + "_" + active.ActivityAction
+		err := elastic.CreateData(elastic.ActivityType, esId, active)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

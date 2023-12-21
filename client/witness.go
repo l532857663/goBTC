@@ -48,14 +48,13 @@ func GetTxWitness(tx *wire.MsgTx) string {
 	return ""
 }
 
-func GetWitnessAndTxHashByTxIn(tx *wire.MsgTx) (string, string) {
+func GetWitnessByTxInFor0(tx *wire.MsgTx) string {
 	vin := tx.TxIn[0]
 	var witness string
 	if len(vin.Witness) > 2 {
 		witness = fmt.Sprintf("%x", vin.Witness[1])
 	}
-	txHash := vin.PreviousOutPoint.Hash.String()
-	return witness, txHash
+	return witness
 }
 
 // 解析Input Script inscribe
@@ -98,7 +97,7 @@ func GetScriptString(data string) *models.OrdInscribeData {
 	// Get 铭文 ord [OP_1指示下一次推送包含内容类型，OP_0 指示后续数据推送包含内容本身。]
 	res, i = getHexData(char, i, "S")
 	if res != "ord" {
-		fmt.Printf("%s: %s\n", res, dataType)
+		fmt.Printf("get data type[%s: %s]\n", res, dataType)
 		return nil
 	}
 	// Get 铭文类型
@@ -222,11 +221,17 @@ func getHexLen(char []byte) int {
 func GetWitnessScript(data string) []string {
 	char, err := hex.DecodeString(data)
 	if err != nil {
-		fmt.Println("The string not hex string")
+		fmt.Println("The string not hex string, error:", err)
 		return nil
 	}
 	for _, c := range char {
 		fmt.Printf("char: %x   %s   %s\n", c, string(c), BTCScriptValueMap[c])
 	}
 	return nil
+}
+
+func GetVinHashAndOutput(vin wire.OutPoint) (string, string) {
+	txId := vin.Hash.String()
+	output := fmt.Sprintf("%s:%v", txId, vin.Index)
+	return txId, output
 }

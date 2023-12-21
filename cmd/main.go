@@ -17,7 +17,8 @@ func main() {
 	srv = global.Client
 	// GetBlockInfoByHash()
 	// SignTx()
-	GetWitness()
+	// GetWitness()
+	GetWitnessScript()
 	if global.MysqlFlag {
 		utils.SignalHandler("main", goBTC.Shutdown)
 	}
@@ -51,11 +52,12 @@ func GetWitnessResByHash(hash string) (string, error) {
 		fmt.Printf("GetRawTransactionByHash error: %+v\n", err)
 		return "", err
 	}
+	fmt.Printf("wch---- data: %+v\n", data)
 	witness := client.GetTxWitnessByTxHex(data.Hex)
 	if witness == "" {
 		return "", nil
 	}
-	// fmt.Printf("witness: %+v\n", witness)
+	fmt.Printf("witness: %+v\n", witness)
 	resList := client.GetScriptString(witness)
 	if resList == nil {
 		return "", nil
@@ -83,6 +85,11 @@ func GetWitness() {
 	} else {
 		fmt.Printf("body: %s\n", body)
 	}
+}
+
+func GetWitnessScript() {
+	script := `70736274ff0100f4020000000300000000000000000000000000000000000000000000000000000000000000000000000000ffffffff00000000000000000000000000000000000000000000000000000000000000000100000000ffffffff40337d5bb0d29219ed84a8144f1e6039bf54bde8857351bc7c97aae5b0ffddd00000000000ffffffff0300000000000000001976a914000000000000000000000000000000000000000088ac00000000000000001976a914000000000000000000000000000000000000000088ac40420f000000000022512058a350ef35006b103344b06237ac02ac3133a462417348edf1ab8b0596780f37000000000001011f0000000000000000160014ae47938f7acd1623e6e10e1ebcc33c2a7cb6e30d0001011f0000000000000000160014ae47938f7acd1623e6e10e1ebcc33c2a7cb6e30d0001012b220200000000000022512058a350ef35006b103344b06237ac02ac3133a462417348edf1ab8b0596780f3701030483000000011720a9f6467`
+	client.GetWitnessScript(script)
 }
 
 func SignTx() {

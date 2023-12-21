@@ -30,9 +30,11 @@ const (
 	ActivityTypeTransfer  = "Transfer"
 
 	// Activity action
-	ActivityActionNew      = "New inscription"
-	ActivityActionReceived = "Received"
-	ActivityActionSent     = "Sent"
+	ActivityActionDeploy   = "deploy"
+	ActivityActionMint     = "mint"
+	ActivityActionTransfer = "transfer"
+	ActivityActionReceive  = "receive"
+	ActivityActionSend     = "send"
 
 	// TokenMintedState
 	TokenMintedInit     = "init"
