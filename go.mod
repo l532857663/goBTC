@@ -11,6 +11,7 @@ require (
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/minchenzz/brc20tool v0.0.0-20230430042556-a383f1b5d34a
 	github.com/pkg/errors v0.9.1
+	github.com/robfig/cron/v3 v3.0.1
 	github.com/shopspring/decimal v1.3.1
 	go.uber.org/zap v1.24.0
 	gopkg.in/yaml.v2 v2.3.0

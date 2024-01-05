@@ -21,7 +21,7 @@ func GetTxWitnessByTxHex(txHex string) string {
 	}
 	var tx wire.MsgTx
 	tx.Deserialize(bytes.NewReader(txBytes))
-	return GetTxWitness(&tx)
+	return GetWitnessByTxInFor0(&tx)
 }
 
 // 解析原始交易

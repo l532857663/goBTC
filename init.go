@@ -3,7 +3,7 @@ package goBTC
 import (
 	"goBTC/client"
 	"goBTC/db"
-	"goBTC/db/inscribe"
+	"goBTC/db/brc20_market"
 	"goBTC/elastic"
 	"goBTC/global"
 	"goBTC/models"
@@ -35,10 +35,12 @@ func MustLoad(confPath string) {
 
 	// 数据库连接
 	if global.MysqlFlag {
-		inscribeInfo := &inscribe.InscribeInfo{}
-		db.Gorm(global.CONFIG.Mysql, global.LOG, inscribeInfo.TableName())
-		ordBrc20 := &inscribe.OrdToken{}
-		db.Gorm(global.CONFIG.Mysql, global.LOG, ordBrc20.TableName())
+		orderTb := &brc20_market.Order{}
+		db.Gorm(global.CONFIG.Mysql, global.LOG, orderTb.TableName())
+		inscribeConfTb := &brc20_market.InscribeConfig{}
+		db.Gorm(global.CONFIG.Mysql, global.LOG, inscribeConfTb.TableName())
+		rateTb := &brc20_market.Rate{}
+		db.Gorm(global.CONFIG.Mysql, global.LOG, rateTb.TableName())
 	}
 }
 

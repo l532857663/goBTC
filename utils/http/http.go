@@ -6,6 +6,7 @@ import (
 	"crypto/x509"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -119,4 +120,35 @@ func HttpGetWithHeader(url string, header map[string]string) (code int, body str
 		return 0, "", err
 	}
 	return response.StatusCode, string(bytess), nil
+}
+
+func HttpWithTimeoutDisableKeepAlives(url, method string) (int, []byte, error) {
+	timeout := 30 * time.Second
+	client := &http.Client{
+		Timeout: timeout,
+		Transport: &http.Transport{
+			// 设置为短连接请求模式
+			DisableKeepAlives: true,
+		},
+	}
+
+	req, err := http.NewRequest(method, url, nil)
+	if err != nil {
+		return 0, nil, err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return 0, nil, err
+	}
+
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return 0, nil, err
+	}
+
+	return resp.StatusCode, body, nil
 }

@@ -44,28 +44,6 @@ func GetBlockInfoByHash() {
 	}
 }
 
-func GetWitnessResByHash(hash string) (string, error) {
-	// 查询Witness的铭文数据
-	data, err := srv.GetRawTransactionByHash(hash)
-	if err != nil {
-		fmt.Printf("GetRawTransactionByHash error: %+v\n", err)
-		return "", err
-	}
-	fmt.Printf("wch---- data: %+v\n", data)
-	witness := client.GetTxWitnessByTxHex(data.Hex)
-	if witness == "" {
-		return "", nil
-	}
-	fmt.Printf("witness: %+v\n", witness)
-	resList := client.GetScriptString(witness)
-	if resList == nil {
-		return "", nil
-	}
-	fmt.Printf("body len: %+v\n", resList.ContentSize)
-	fmt.Printf("Brc20: %+v\n", resList.Brc20.Tick)
-	return resList.Body, nil
-}
-
 func GetWitness() {
 	// hash := "7fb631b7ed420c07b546ee4db8527a9523bbc44961f9983430166988cd6beeeb" // TEXT_1
 	// hash := "bdbf2d7e385f650cbcba9a0ae83dc3f466dadc1e48732835e977cfefe2710b42" // TEXT_2
@@ -77,7 +55,7 @@ func GetWitness() {
 	// hash := "5ee59cb5f2b88d1aa1dd7ef0f6263a2682412866e8cdb73275fa013429169623"
 	hash := "231746e07440a6fa81d45f0d26e0510329175de1cac07b64c0a53faafb3b551d"
 
-	body, _ := GetWitnessResByHash(hash)
+	body, _ := server.GetWitnessResByHash(hash)
 	l := len(body)
 	if l > 500 {
 		fmt.Printf("body len: %s\n", l)

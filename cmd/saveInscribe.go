@@ -23,8 +23,8 @@ func main() {
 	goBTC.MustLoad("./config.yml")
 	srv = global.Client
 	log = global.LOG
-	// GetInscribptionByTxhashAndHeight()
-	FixIncribeMoreTransferError()
+	GetInscribptionByTxhashAndHeight()
+	// FixIncribeMoreTransferError()
 	if global.MysqlFlag {
 		utils.SignalHandler("brc20Assets", goBTC.Shutdown)
 	}
@@ -34,10 +34,10 @@ func GetInscribptionByTxhashAndHeight() {
 	//txHash := "5ee59cb5f2b88d1aa1dd7ef0f6263a2682412866e8cdb73275fa013429169623" // 创建BRC20
 	//txHash := "231746e07440a6fa81d45f0d26e0510329175de1cac07b64c0a53faafb3b551d" // 转移BRC20
 	tmp := []string{
-		"baacef81d8713e364e27d098d03160e41640b634a07254b537008745f6f76408",
+		"abbe82ce159f21ce45e4ed59ae0623fe7b9d02b94e06e45fbf2d7eb23a408d1a",
 	}
 	b := []int64{
-		775398,
+		2568712,
 	}
 	for i, v := range tmp {
 		GetHashInfo(v, b[i])

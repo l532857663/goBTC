@@ -3,6 +3,7 @@ package models
 import (
 	"goBTC/db"
 	"goBTC/elastic"
+	"time"
 )
 
 type Server struct {
@@ -11,6 +12,7 @@ type Server struct {
 	Https       Https                 `mapstructure:"https"        json:"https"        yaml:"https"`        // 网络配置
 	ElasticConf elastic.ElasticConfig `mapstructure:"elastic_conf" json:"elastic_conf" yaml:"elastic_conf"` // elastic配置
 	ChainNode   ChainNode             `mapstructure:"chain_node"   json:"chain_node"   yaml:"chain_node"`   // 链节点配置
+	CronTasks   CronTasks             `mapstructure:"cron_tasks"   json:"cron_tasks"   yaml:"cron_tasks"`   // 定时任务
 }
 
 type Zap struct {
@@ -38,4 +40,9 @@ type ChainNode struct {
 	Net         string            `mapstructure:"net"             yaml:"net"`          // 网络类型
 	ChainConfig map[string]string `mapstructure:"chain_config"    yaml:"chain_config"` // 链配置
 	NodeJsUrl   string            `mapstructure:"node_js_url"      yaml:"node_js_url"` // 请求nodejs链接
+}
+
+type CronTasks struct {
+	GetPriceService string        `mapstructure:"get_price_service" yaml:"get_price_service"`
+	GetTransferInfo time.Duration `mapstructure:"get_transfer_info" yaml:"get_transfer_info"`
 }

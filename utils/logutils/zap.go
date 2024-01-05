@@ -143,3 +143,13 @@ func ZapHook(level zapcore.Level) func(zapcore.Entry) error {
 		return nil
 	}
 }
+
+func LogInfof(logCli *zap.Logger, format string, a ...any) {
+	logStr := fmt.Sprintf(format, a...)
+	logCli.Info(logStr)
+}
+
+func LogErrorf(logCli *zap.Logger, format string, a ...any) {
+	logStr := fmt.Sprintf(format, a...)
+	logCli.Error(logStr)
+}
