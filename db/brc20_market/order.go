@@ -16,8 +16,8 @@ type Order struct {
 	ContentType     *string `gorm:"column:content_type;type:varchar(255);default:null"`
 	BlockHeight     *int64  `gorm:"column:block_height"`
 	Tick            string  `gorm:"column:tick;type:varchar(255);not null"`
-	Side            int8    `gorm:"column:side;not null;default:1"`
-	State           int8    `gorm:"column:state;not null;default:1"`
+	Side            int     `gorm:"column:side;not null;default:1"`
+	State           int     `gorm:"column:state;not null;default:1"`
 	Number          int64   `gorm:"column:number;not null"`
 	Amount          int64   `gorm:"column:amount;not null"`
 	TotalAmount     int64   `gorm:"column:total_amount;not null"`

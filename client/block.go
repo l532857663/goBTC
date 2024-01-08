@@ -3,6 +3,7 @@ package client
 import (
 	"log"
 
+	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/wire"
 )
@@ -39,4 +40,9 @@ func (c *BTCClient) GetBlockInfoByHash(hash string) (*wire.MsgBlock, error) {
 		return nil, err
 	}
 	return c.Client.GetBlock(h)
+}
+
+// 根据块HASH查询数据
+func (c *BTCClient) GetBlockStatus(hashOrHeight string) (*btcjson.GetBlockStatsResult, error) {
+	return c.Client.GetBlockStats(hashOrHeight, nil)
 }
