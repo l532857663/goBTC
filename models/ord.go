@@ -21,3 +21,11 @@ type OrdBRC20 struct {
 	Max  string `json:"max,omitempty"`
 	Name string `json:"name,omitempty"`
 }
+
+type CreateOrdFilter struct {
+	ContentType   string
+	Body          string
+	Destination   string
+	TxFee         int64
+	ChangeAddress string
+}

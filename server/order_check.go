@@ -19,7 +19,7 @@ func QueryPendingOrder4DB() {
 	// for _, data := range list {
 	// 	fmt.Printf("wch----- data: %+v\n", data)
 	// }
-	hash := "00ce62a9bf686e13a692d96748c575cbc310c29156821482797245ece0274322"
+	hash := "a35167d6ea2b355b8614f6661d0f917101b34eaf7b742182bc3743792799b775"
 	data, err := QueryTransferInfo(hash)
 	if err != nil {
 		logutils.LogErrorf(log, "QueryTransferInfo error: %+v", err)
