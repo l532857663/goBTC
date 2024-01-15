@@ -205,6 +205,8 @@ func (c *BTCClient) CreateInscribe(filter models.CreateOrdFilter) (*models.Creat
 		RevealOutValue:         546,
 		InscriptionDataList:    dataList,
 		ChangeAddress:          filter.ChangeAddress,
+		ServiceFeeAddress:      filter.ServiceFeeAddress,
+		ServiceFee:             filter.ServiceFee,
 	}
 
 	tool, err := NewInscriptionTool(c.Params, request)
@@ -246,6 +248,7 @@ func (c *BTCClient) CreateInscribe(filter models.CreateOrdFilter) (*models.Creat
 		CommitFee:   commitTxFee,
 		RevealFee:   revealTxFee,
 		RevealValue: request.RevealOutValue,
+		ServiceFee:  filter.ServiceFee,
 	}
 
 	return respData, nil

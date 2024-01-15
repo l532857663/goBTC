@@ -28,7 +28,7 @@ type GetBalanceParam struct {
 type CreateTransferParam struct {
 	Address string `json:"address"`
 	Tick    string `json:"tick"`
-	Amount  string `json:"amount"`
+	Amount  int64  `json:"amount"`
 	FeeRate int64  `json:"feeRate"`
 }
 

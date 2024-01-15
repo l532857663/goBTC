@@ -23,9 +23,22 @@ type OrdBRC20 struct {
 }
 
 type CreateOrdFilter struct {
-	ContentType   string
-	Body          string
-	Destination   string
-	TxFee         int64
-	ChangeAddress string
+	ContentType       string
+	Body              string
+	Destination       string
+	TxFee             int64
+	ChangeAddress     string
+	ServiceFeeAddress string
+	ServiceFee        int64
+}
+
+type OrdiInfo struct {
+	Tick        string
+	Amount      int64
+	Body        string
+	To          string
+	ServiceFee  int64
+	GasFee      int64
+	GasFeeTotal int64
+	PSBTData    string
 }

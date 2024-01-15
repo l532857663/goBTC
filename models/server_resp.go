@@ -89,7 +89,7 @@ type CreateTransferResp struct {
 	CommitFee   int64  `json:"commitFee"`
 	RevealFee   int64  `json:"revealFee"`
 	RevealValue int64  `json:"revealValue"`
-	ServiceFee  string `json:"serviceFee"`
+	ServiceFee  int64  `json:"serviceFee"`
 }
 
 type SendTransferResp struct {

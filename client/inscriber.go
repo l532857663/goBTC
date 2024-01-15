@@ -39,6 +39,8 @@ type InscriptionRequest struct {
 	ChangeAddress          string            `json:"changeAddress"`
 	MinChangeValue         int64             `json:"minChangeValue"`
 	CommitValue            int64
+	ServiceFeeAddress      string
+	ServiceFee             int64
 }
 
 type inscriptionTxCtxData struct {
@@ -62,6 +64,8 @@ type InscriptionBuilder struct {
 	MustCommitTxFee           int64
 	MustRevealTxFees          []int64
 	CommitAddrs               []string
+	ServiceFeeAddress         string
+	ServiceFee                int64
 }
 
 type InscribeTxs struct {
@@ -253,6 +257,9 @@ func (builder *InscriptionBuilder) GetEmptyCommitValue(commitFeeRate int64) int6
 	for i := range builder.InscriptionTxCtxDataList {
 		tx.AddTxOut(builder.InscriptionTxCtxDataList[i].RevealTxPrevOutput)
 	}
+	servicePkScript, _ := AddrToPkScript(builder.ServiceFeeAddress, builder.Network)
+	tx.AddTxOut(wire.NewTxOut(0, servicePkScript))
+	tx.AddTxOut(wire.NewTxOut(0, servicePkScript))
 	fee := GetTxVirtualSize(btcutil.NewTx(tx)) * commitFeeRate
 	return fee
 }
@@ -260,6 +267,7 @@ func (builder *InscriptionBuilder) GetEmptyCommitValue(commitFeeRate int64) int6
 func (builder *InscriptionBuilder) buildCommitTx(commitTxPrevOutputList []*PrevOutput, changeAddress string, totalRevealPrevOutputValue, commitFeeRate int64, minChangeValue int64) error {
 	totalSenderAmount := btcutil.Amount(0)
 	tx := wire.NewMsgTx(DefaultTxVersion)
+	servicePkScript, err := AddrToPkScript(builder.ServiceFeeAddress, builder.Network)
 	changePkScript, err := AddrToPkScript(changeAddress, builder.Network)
 	if err != nil {
 		return err
@@ -287,6 +295,8 @@ func (builder *InscriptionBuilder) buildCommitTx(commitTxPrevOutputList []*PrevO
 		tx.AddTxOut(builder.InscriptionTxCtxDataList[i].RevealTxPrevOutput)
 	}
 
+	// 服务费
+	tx.AddTxOut(wire.NewTxOut(builder.ServiceFee, servicePkScript))
 	tx.AddTxOut(wire.NewTxOut(0, changePkScript))
 
 	txForEstimate := wire.NewMsgTx(DefaultTxVersion)
@@ -297,7 +307,7 @@ func (builder *InscriptionBuilder) buildCommitTx(commitTxPrevOutputList []*PrevO
 	}
 
 	fee := btcutil.Amount(GetTxVirtualSize(btcutil.NewTx(txForEstimate))) * btcutil.Amount(commitFeeRate)
-	changeAmount := totalSenderAmount - btcutil.Amount(totalRevealPrevOutputValue) - fee
+	changeAmount := totalSenderAmount - btcutil.Amount(totalRevealPrevOutputValue) - fee - btcutil.Amount(builder.ServiceFee)
 	if int64(changeAmount) >= minChangeValue {
 		tx.TxOut[len(tx.TxOut)-1].Value = int64(changeAmount)
 	} else {
@@ -607,5 +617,7 @@ func (builder *InscriptionBuilder) getCommitUTXO(request *InscriptionRequest) er
 	}
 	builder.CommitTxPrevOutputList = commitTxPrevOutputList
 	builder.CommitTxPrivateKeyList = commitTxPrivateKeyList
+	builder.ServiceFeeAddress = request.ServiceFeeAddress
+	builder.ServiceFee = request.ServiceFee
 	return nil
 }

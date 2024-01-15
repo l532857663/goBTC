@@ -6,6 +6,7 @@ import (
 	"goBTC/client"
 	"goBTC/global"
 	"goBTC/models"
+	"goBTC/server"
 	"goBTC/utils"
 	"goBTC/utils/resp"
 	"net/http"
@@ -16,12 +17,13 @@ import (
 )
 
 var (
-	srv *client.BTCClient
+	srv      *client.BTCClient
+	OrdiInfo = make(map[string]*models.OrdiInfo)
 )
 
 func main() {
 	fmt.Println("vim-go")
-	// global.MysqlFlag = true
+	global.MysqlFlag = true
 	goBTC.MustLoad("./config.yml")
 	srv = global.Client
 	RunServer()
@@ -40,8 +42,7 @@ func RunServer() {
 			group.POST("sendTransfer", sendTransfer)
 		}
 	}
-	// address := fmt.Sprintf(":%d", config.CONFIG.System.Addr)
-	address := fmt.Sprintf(":%d", 4396)
+	address := global.CONFIG.Service.ServiceAddr
 	httpType := "HTTP"
 	server := &http.Server{
 		Addr:    address,
@@ -69,16 +70,18 @@ func createInscribe(c *gin.Context) {
 		return
 	}
 	addr := param.Address
-	body := fmt.Sprintf(`{"p":"brc-20","op":"%s","tick":"%s","amt":"%s"}`, "transfer", param.Tick, param.Amount)
+	body := fmt.Sprintf(`{"p":"brc-20","op":"%s","tick":"%s","amt":"%d"}`, "transfer", param.Tick, param.Amount)
 	txFeeRate := param.FeeRate
 
 	// 处理数据
 	filter := models.CreateOrdFilter{
-		ContentType:   "text/plain;charset=utf-8",
-		Body:          body,
-		Destination:   addr,
-		TxFee:         txFeeRate,
-		ChangeAddress: addr,
+		ContentType:       "text/plain;charset=utf-8",
+		Body:              body,
+		Destination:       addr,
+		TxFee:             txFeeRate,
+		ChangeAddress:     addr,
+		ServiceFeeAddress: global.CONFIG.Service.ServiceFeeAddress,
+		ServiceFee:        global.CONFIG.Service.ServiceFee,
 	}
 	respData, err := srv.CreateInscribe(filter)
 	if err != nil {
@@ -86,6 +89,18 @@ func createInscribe(c *gin.Context) {
 		resp.FailWithCodeMessage(200, err.Error(), c)
 		return
 	}
+
+	ordiInfo := &models.OrdiInfo{
+		Tick:        param.Tick,
+		Amount:      param.Amount,
+		Body:        body,
+		To:          addr,
+		ServiceFee:  global.CONFIG.Service.ServiceFee,
+		GasFee:      txFeeRate,
+		GasFeeTotal: respData.RevealFee,
+		PSBTData:    respData.PSBTData,
+	}
+	OrdiInfo[respData.Key] = ordiInfo
 
 	resp.OkWithData(respData, c)
 	return
@@ -106,26 +121,32 @@ func sendTransfer(c *gin.Context) {
 		return
 	}
 	global.LOG.Info("commit txs:", zap.Any("info:", txs))
-	commitTxHash, err := srv.SendRawTransaction(txs.CommitTx)
-	if err != nil {
-		global.LOG.Error("srv.SendRawTransaction commit error！", zap.Any("err", err))
-		resp.FailWithCodeMessage(200, err.Error(), c)
-		return
+	// commitTxHash, err := srv.SendRawTransaction(txs.CommitTx)
+	// if err != nil {
+	// 	global.LOG.Error("srv.SendRawTransaction commit error！", zap.Any("err", err))
+	// 	resp.FailWithCodeMessage(200, err.Error(), c)
+	// 	return
+	// }
+	// revealTxHash := []string{}
+	// for i, revealTx := range txs.RevealTxs {
+	// 	txHash, err := srv.SendRawTransaction(revealTx)
+	// 	if err != nil {
+	// 		global.LOG.Error("srv.SendRawTransaction reveal error！", zap.Any("i", i), zap.Any("err", err))
+	// 		resp.FailWithCodeMessage(200, err.Error(), c)
+	// 		return
+	// 	}
+	// 	revealTxHash = append(revealTxHash, txHash)
+	// }
+	revealTxHash := []string{
+		"19d3d5aa48abf4252b05792503d18ee2220f3e848d26cf4a765b573d4900912c",
 	}
-	revealTxHash := []string{}
-	for i, revealTx := range txs.RevealTxs {
-		txHash, err := srv.SendRawTransaction(revealTx)
-		if err != nil {
-			global.LOG.Error("srv.SendRawTransaction reveal error！", zap.Any("i", i), zap.Any("err", err))
-			resp.FailWithCodeMessage(200, err.Error(), c)
-			return
-		}
-		revealTxHash = append(revealTxHash, txHash)
+	for _, txHash := range revealTxHash {
+		server.SaveOrder(txHash, OrdiInfo[param.Key])
 	}
 	// 返回结果
 	respData := &models.SendTransferResp{
-		CommitTxHash: commitTxHash,
-		RevealTxHash: revealTxHash,
+		// CommitTxHash: commitTxHash,
+		// RevealTxHash: revealTxHash,
 	}
 
 	resp.OkWithData(respData, c)
