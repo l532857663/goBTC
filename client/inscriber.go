@@ -1,9 +1,8 @@
-package ord
+package client
 
 import (
 	"bytes"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -39,6 +38,7 @@ type InscriptionRequest struct {
 	RevealOutValue         int64             `json:"revealOutValue"`
 	ChangeAddress          string            `json:"changeAddress"`
 	MinChangeValue         int64             `json:"minChangeValue"`
+	CommitValue            int64
 }
 
 type inscriptionTxCtxData struct {
@@ -80,24 +80,16 @@ const (
 
 	MaxStandardTxWeight = 4000000 / 10
 	WitnessScaleFactor  = 4
+
+	DefaultKey = "cUAxLxQT6Wu2yqtk1fSVmFbdAeKnadjYFov2Yok9ZdSoRuPq9Vs9"
 )
 
 func NewInscriptionTool(network *chaincfg.Params, request *InscriptionRequest) (*InscriptionBuilder, error) {
-	var commitTxPrivateKeyList []*btcec.PrivateKey
-	for _, prevOutput := range request.CommitTxPrevOutputList {
-		privateKeyWif, err := btcutil.DecodeWIF(prevOutput.PrivateKey)
-		if err != nil {
-			return nil, err
-		}
-		commitTxPrivateKeyList = append(commitTxPrivateKeyList, privateKeyWif.PrivKey)
-	}
 	tool := &InscriptionBuilder{
 		Network:                   network,
 		CommitTxPrevOutputFetcher: txscript.NewMultiPrevOutFetcher(nil),
-		CommitTxPrivateKeyList:    commitTxPrivateKeyList,
 		InscriptionTxCtxDataList:  make([]*inscriptionTxCtxData, len(request.InscriptionDataList)),
 		RevealTxPrevOutputFetcher: txscript.NewMultiPrevOutFetcher(nil),
-		CommitTxPrevOutputList:    request.CommitTxPrevOutputList,
 	}
 	return tool, tool.initTool(network, request)
 }
@@ -117,7 +109,6 @@ func (builder *InscriptionBuilder) initTool(network *chaincfg.Params, request *I
 		if err != nil {
 			return err
 		}
-		fmt.Printf("wch-----: aaaa: %x\n", inscriptionTxCtxData.PrivateKey.Serialize())
 		builder.InscriptionTxCtxDataList[i] = inscriptionTxCtxData
 		destinations[i] = request.InscriptionDataList[i].RevealAddr
 	}
@@ -125,26 +116,22 @@ func (builder *InscriptionBuilder) initTool(network *chaincfg.Params, request *I
 	if err != nil {
 		return err
 	}
-	err = builder.buildCommitTx(request.CommitTxPrevOutputList, request.ChangeAddress, totalRevealPrevOutputValue, request.CommitFeeRate, minChangeValue)
+	commitFee := builder.GetEmptyCommitValue(request.CommitFeeRate)
+	request.CommitValue = totalRevealPrevOutputValue + commitFee + DefaultMinChangeValue
+	// 获取地址可用UTXO(后端判断使用大于1000sat的UTXO)
+	err = builder.getCommitUTXO(request)
 	if err != nil {
 		return err
 	}
-	// // 自带私钥处理
-	// err = builder.signCommitTx()
-	// if err != nil {
-	// 	return errors.New("sign commit tx error")
-	// }
-	// err = builder.CompleteRevealTx()
-	// if err != nil {
-	// 	return err
-	// }
-	// 使用UNISAT签名处理
-	builder.GetSignHash()
+	err = builder.buildCommitTx(builder.CommitTxPrevOutputList, request.ChangeAddress, totalRevealPrevOutputValue, request.CommitFeeRate, minChangeValue)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 func newInscriptionTxCtxData(network *chaincfg.Params, inscriptionRequest *InscriptionRequest, indexOfInscriptionDataList int) (*inscriptionTxCtxData, error) {
-	privateKeyWif, err := btcutil.DecodeWIF(inscriptionRequest.CommitTxPrevOutputList[0].PrivateKey)
+	privateKeyWif, err := btcutil.DecodeWIF(DefaultKey)
 	if err != nil {
 		return nil, err
 	}
@@ -251,6 +238,23 @@ func (builder *InscriptionBuilder) buildEmptyRevealTx(destination []string, reve
 	builder.CommitAddrs = commitAddrs
 
 	return totalPrevOutputValue, nil
+}
+
+func (builder *InscriptionBuilder) GetEmptyCommitValue(commitFeeRate int64) int64 {
+	tx := wire.NewMsgTx(DefaultTxVersion)
+	txHash, err := chainhash.NewHashFromStr("0e7854b64e83dea3f997db7bc13e741be298d36641c1233b0000000000000000")
+	if err != nil {
+		return 0
+	}
+	outPoint := wire.NewOutPoint(txHash, 0)
+	in := wire.NewTxIn(outPoint, nil, nil)
+	in.Sequence = DefaultSequenceNum
+	tx.AddTxIn(in)
+	for i := range builder.InscriptionTxCtxDataList {
+		tx.AddTxOut(builder.InscriptionTxCtxDataList[i].RevealTxPrevOutput)
+	}
+	fee := GetTxVirtualSize(btcutil.NewTx(tx)) * commitFeeRate
+	return fee
 }
 
 func (builder *InscriptionBuilder) buildCommitTx(commitTxPrevOutputList []*PrevOutput, changeAddress string, totalRevealPrevOutputValue, commitFeeRate int64, minChangeValue int64) error {
@@ -434,47 +438,6 @@ func (builder *InscriptionBuilder) CalculateFee() (int64, []int64) {
 	return commitTxFee, revealTxFees
 }
 
-func Inscribe(network *chaincfg.Params, request *InscriptionRequest) (*InscribeTxs, error) {
-	tool, err := NewInscriptionTool(network, request)
-	if err != nil && err.Error() == "insufficient balance" {
-		return &InscribeTxs{
-			CommitTx:     "",
-			RevealTxs:    []string{},
-			CommitTxFee:  tool.MustCommitTxFee,
-			RevealTxFees: tool.MustRevealTxFees,
-			CommitAddrs:  tool.CommitAddrs,
-		}, nil
-	}
-
-	if err != nil {
-		return nil, err
-	}
-	toolByte, err := json.Marshal(tool)
-	if err != nil {
-		return nil, err
-	}
-	fmt.Printf("wch----- tool: %+v\n", string(toolByte))
-
-	commitTx, err := tool.GetCommitTxHex()
-	if err != nil {
-		return nil, err
-	}
-	revealTxs, err := tool.GetRevealTxHexList()
-	if err != nil {
-		return nil, err
-	}
-
-	commitTxFee, revealTxFees := tool.CalculateFee()
-
-	return &InscribeTxs{
-		CommitTx:     commitTx,
-		RevealTxs:    revealTxs,
-		CommitTxFee:  commitTxFee,
-		RevealTxFees: revealTxFees,
-		CommitAddrs:  tool.CommitAddrs,
-	}, nil
-}
-
 // GetTransactionWeight computes the value of the weight metric for a given
 // transaction. Currently the weight metric is simply the sum of the
 // transactions's serialized size without any witness data scaled
@@ -521,9 +484,8 @@ func PayToWitnessPubKeyHashScript(pubKeyHash []byte) ([]byte, error) {
 	return txscript.NewScriptBuilder().AddOp(txscript.OP_0).AddData(pubKeyHash).Script()
 }
 
-func (builder *InscriptionBuilder) GetSignHash() {
+func (builder *InscriptionBuilder) GetSignHash() ([]byte, error) {
 	tx := builder.CommitTx
-	fmt.Printf("wch----- tx: in: %+v\n", tx.TxIn)
 	inputs := []*wire.OutPoint{}
 	for _, in := range tx.TxIn {
 		inputs = append(inputs, &in.PreviousOutPoint)
@@ -532,28 +494,28 @@ func (builder *InscriptionBuilder) GetSignHash() {
 	p, err := psbt.New(inputs, tx.TxOut, int32(2), uint32(0), nSequences)
 	if err != nil {
 		fmt.Printf("psbt New error: %+v\n", err)
-		return
+		return nil, err
 	}
 
 	updater, err := psbt.NewUpdater(p)
 	if err != nil {
 		fmt.Printf("psbt.NewUpdater error: %+v\n", err)
-		return
+		return nil, err
 	}
 	err = builder.UpdatePSBT(updater)
 	if err != nil {
 		fmt.Printf("builder.UpdatePSBT error: %+v\n", err)
-		return
+		return nil, err
 	}
 
-	fmt.Printf("wch------- p: %+v\n", p)
-	fmt.Printf("wch------- p: %+v\n", p.UnsignedTx)
+	// fmt.Printf("wch------- p: %+v\n", p)
+	// fmt.Printf("wch------- p: %+v\n", p.UnsignedTx)
 	var b bytes.Buffer
 	if err := p.Serialize(&b); err != nil {
 		fmt.Printf("p.Serialize error: %+v\n", err)
-		return
+		return nil, err
 	}
-	fmt.Printf("data: %x\n", b)
+	return b.Bytes(), nil
 }
 
 func (builder *InscriptionBuilder) UpdatePSBT(updater *psbt.Updater) error {
@@ -622,4 +584,28 @@ func ExtractTxFromSignedPSBT(psbtHex string) (string, error) {
 	tx, err := psbt.Extract(p)
 
 	return GetTxHex(tx)
+}
+
+func (builder *InscriptionBuilder) getCommitUTXO(request *InscriptionRequest) error {
+	commitTxPrevOutputList := make([]*PrevOutput, 0)
+	value := request.CommitValue
+	var sum int64
+	var flag bool
+	var commitTxPrivateKeyList []*btcec.PrivateKey
+	privateKeyWif, _ := btcutil.DecodeWIF(DefaultKey)
+	for _, utxo := range request.CommitTxPrevOutputList {
+		if sum > value {
+			flag = true
+			break
+		}
+		sum += utxo.Amount
+		commitTxPrevOutputList = append(commitTxPrevOutputList, utxo)
+		commitTxPrivateKeyList = append(commitTxPrivateKeyList, privateKeyWif.PrivKey)
+	}
+	if !flag {
+		return fmt.Errorf("Not enougth utxo for commit")
+	}
+	builder.CommitTxPrevOutputList = commitTxPrevOutputList
+	builder.CommitTxPrivateKeyList = commitTxPrivateKeyList
+	return nil
 }

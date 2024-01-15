@@ -82,3 +82,17 @@ type InscriptionsList struct {
 	ContentSize       string `json:"contentSize"`
 	Time              string `json:"time"`
 }
+
+type CreateTransferResp struct {
+	PSBTData    string `json:"psbtData"`
+	Key         string `json:"key"`
+	CommitFee   int64  `json:"commitFee"`
+	RevealFee   int64  `json:"revealFee"`
+	RevealValue int64  `json:"revealValue"`
+	ServiceFee  string `json:"serviceFee"`
+}
+
+type SendTransferResp struct {
+	CommitTxHash string   `json:"commitTxHash"`
+	RevealTxHash []string `json:"revealTxHash"`
+}
