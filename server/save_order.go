@@ -3,6 +3,7 @@ package server
 import (
 	"bytes"
 	"goBTC/db/brc20_market"
+	"goBTC/global"
 	"goBTC/models"
 	"goBTC/utils/logutils"
 	"io/ioutil"
@@ -14,6 +15,7 @@ import (
 )
 
 func SaveOrder(txHash string, ordiInfo *models.OrdiInfo) {
+	log := global.LOG
 	// 保存铭文订单信息
 	inscriberID := txHash + "i0"
 	order := &brc20_market.Order{
@@ -37,6 +39,7 @@ func SaveOrder(txHash string, ordiInfo *models.OrdiInfo) {
 }
 
 func GetInscriptionInfoByOrdinals(order *brc20_market.Order) {
+	log := global.LOG
 	// 发送GET请求
 	resp, err := http.Get("https://ordinals.com/inscription/" + *order.InscribeID) // 替换为你要抓取的URL
 	if err != nil {
