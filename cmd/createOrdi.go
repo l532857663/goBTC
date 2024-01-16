@@ -99,6 +99,7 @@ func createInscribe(c *gin.Context) {
 		GasFee:      txFeeRate,
 		GasFeeTotal: respData.RevealFee,
 		PSBTData:    respData.PSBTData,
+		ContentType: filter.ContentType,
 	}
 	OrdiInfo[respData.Key] = ordiInfo
 
@@ -121,32 +122,29 @@ func sendTransfer(c *gin.Context) {
 		return
 	}
 	global.LOG.Info("commit txs:", zap.Any("info:", txs))
-	// commitTxHash, err := srv.SendRawTransaction(txs.CommitTx)
-	// if err != nil {
-	// 	global.LOG.Error("srv.SendRawTransaction commit error！", zap.Any("err", err))
-	// 	resp.FailWithCodeMessage(200, err.Error(), c)
-	// 	return
-	// }
-	// revealTxHash := []string{}
-	// for i, revealTx := range txs.RevealTxs {
-	// 	txHash, err := srv.SendRawTransaction(revealTx)
-	// 	if err != nil {
-	// 		global.LOG.Error("srv.SendRawTransaction reveal error！", zap.Any("i", i), zap.Any("err", err))
-	// 		resp.FailWithCodeMessage(200, err.Error(), c)
-	// 		return
-	// 	}
-	// 	revealTxHash = append(revealTxHash, txHash)
-	// }
-	revealTxHash := []string{
-		"19d3d5aa48abf4252b05792503d18ee2220f3e848d26cf4a765b573d4900912c",
+	commitTxHash, err := srv.SendRawTransaction(txs.CommitTx)
+	if err != nil {
+		global.LOG.Error("srv.SendRawTransaction commit error！", zap.Any("err", err))
+		resp.FailWithCodeMessage(200, err.Error(), c)
+		return
+	}
+	revealTxHash := []string{}
+	for i, revealTx := range txs.RevealTxs {
+		txHash, err := srv.SendRawTransaction(revealTx)
+		if err != nil {
+			global.LOG.Error("srv.SendRawTransaction reveal error！", zap.Any("i", i), zap.Any("err", err))
+			resp.FailWithCodeMessage(200, err.Error(), c)
+			return
+		}
+		revealTxHash = append(revealTxHash, txHash)
 	}
 	for _, txHash := range revealTxHash {
 		server.SaveOrder(txHash, OrdiInfo[param.Key])
 	}
 	// 返回结果
 	respData := &models.SendTransferResp{
-		// CommitTxHash: commitTxHash,
-		// RevealTxHash: revealTxHash,
+		CommitTxHash: commitTxHash,
+		RevealTxHash: revealTxHash,
 	}
 
 	resp.OkWithData(respData, c)

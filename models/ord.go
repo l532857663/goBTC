@@ -41,4 +41,5 @@ type OrdiInfo struct {
 	GasFee      int64
 	GasFeeTotal int64
 	PSBTData    string
+	ContentType string
 }

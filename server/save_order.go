@@ -20,6 +20,7 @@ func SaveOrder(txHash string, ordiInfo *models.OrdiInfo) {
 		TxHash:          txHash,
 		InscribeID:      &inscriberID,
 		InscribeContent: ordiInfo.Body,
+		ContentType:     &ordiInfo.ContentType,
 		Tick:            ordiInfo.Tick,
 		State:           1,
 		Number:          ordiInfo.Amount,
@@ -28,7 +29,6 @@ func SaveOrder(txHash string, ordiInfo *models.OrdiInfo) {
 		GasFeeTotal:     &ordiInfo.GasFeeTotal,
 		To:              &ordiInfo.To,
 	}
-	GetInscriptionInfoByOrdinals(order)
 	err := order.Create()
 	if err != nil {
 		logutils.LogErrorf(log, "Create pending order txhash[%s], orderInfo[%+v] error: %+v", txHash, order, err)
