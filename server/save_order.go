@@ -63,6 +63,13 @@ func GetInscriptionInfoByOrdinals(order *brc20_market.Order) {
 		return
 	}
 
+	// 查找所有的h1标签并打印它们的内容
+	h1Text := doc.Find("h1").First().Text()
+	h1List := strings.Split(strings.TrimSpace(h1Text), " ")
+	if len(h1List) == 2 {
+		order.InscribeNumber = &h1List[1]
+	}
+
 	// 遍历 dl 标签内的 dt 和 dd 对
 	doc.Find("dl").Each(func(i int, s *goquery.Selection) {
 		s.Children().EachWithBreak(func(j int, child *goquery.Selection) bool {
@@ -75,6 +82,8 @@ func GetInscriptionInfoByOrdinals(order *brc20_market.Order) {
 				}
 				ddContent := strings.TrimSpace(dd.Text())
 				switch dtText {
+				case "id":
+					order.InscribeID = &ddContent
 				case "content type":
 					order.ContentType = &ddContent
 				case "genesis height":

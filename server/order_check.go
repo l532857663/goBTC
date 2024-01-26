@@ -5,30 +5,50 @@ import (
 	"goBTC/db/brc20_market"
 	"goBTC/global"
 	"goBTC/utils/logutils"
+	"strconv"
 )
 
 func QueryPendingOrder4DB() {
 	log := global.LOG
-	// // 查询pending的订单信息
-	// order := &brc20_market.Order{}
-	// list, err := order.GetPendingOrder()
-	// if err != nil {
-	// 	logutils.LogErrorf(log, "GetPendingOrder error: %+v", err)
-	// 	return
-	// }
-	// for _, data := range list {
-	// 	fmt.Printf("wch----- data: %+v\n", data)
-	// }
-	hash := "a35167d6ea2b355b8614f6661d0f917101b34eaf7b742182bc3743792799b775"
-	data, err := QueryTransferInfo(hash)
+	// 查询pending的订单信息
+	list, err := order.GetPendingOrder()
 	if err != nil {
-		logutils.LogErrorf(log, "QueryTransferInfo error: %+v", err)
+		logutils.LogErrorf(log, "GetPendingOrder error: %+v", err)
 		return
 	}
-	logutils.LogInfof(log, "QueryPendingOrder4DB get witness data: %+v", data)
+	for _, data := range list {
+		fmt.Printf("wch----- data: %+v\n", data)
+		order1, err := QueryTransferInfo(data.TxHash, *data.InscribeID)
+		if err != nil {
+			logutils.LogErrorf(log, "QueryTransferInfo error: %+v", err)
+			return
+		}
+		logutils.LogInfof(log, "QueryPendingOrder4DB get witness data: %+v", order1)
+		ok := CheckOrderInfo(data, order1)
+		if ok {
+			// 处理状态
+			switch data.State {
+			case 1:
+				data.State = 2
+			case 4:
+				data.State = 5
+			case 6:
+				data.State = 7
+			default:
+				logutils.LogErrorf(log, "QueryPendingOrder4DB order state error: %+v", data.State)
+				return
+			}
+			// 更新数据库
+			row, err := data.UpdatePendingOrderState()
+			if err != nil {
+				logutils.LogErrorf(log, "UpdatePendingOrderState error: %+v", err)
+				return
+			}
+		}
+	}
 }
 
-func QueryTransferInfo(hash string) (*brc20_market.Order, error) {
+func QueryTransferInfo(hash, inscribeId string) (*brc20_market.Order, error) {
 	srv := global.Client
 	log := global.LOG
 	data, err := srv.GetRawTransactionByHash(hash)
@@ -53,20 +73,41 @@ func QueryTransferInfo(hash string) (*brc20_market.Order, error) {
 	}
 	logutils.LogInfof(log, "body len: %+v", inscriberInfo.ContentSize)
 	logutils.LogInfof(log, "Brc20: %+v", inscriberInfo.Brc20.Tick)
-	// 校验地址
-	// 校验数量
-	// 处理状态
-	inscribeId := ""
-	state := 2
 	// 整理订单数据
+	amount, _ := strconv.ParseInt(inscriberInfo.Brc20.Amt, 0, 64)
+
 	order := &brc20_market.Order{
-		InscribeID:      &inscribeId,        // 这个
+		InscribeID:      &inscribeId,
 		InscribeContent: inscriberInfo.Body, // 这个
-		ContentType:     &inscriberInfo.ContentType,
-		BlockHeight:     &blockInfo.Height, // 这个
 		Tick:            inscriberInfo.Brc20.Tick,
-		State:           state,
+		Number:          amount,
 	}
-	fmt.Printf("wch---- order: %+v\n", order)
+	GetInscriptionInfoByOrdinals(order)
 	return order, nil
+}
+
+func CheckOrderInfo(order, checkOrder *brc20_market.Order) bool {
+	log := global.LOG
+	funcName := "CheckOrderInfo"
+	// inscribeId
+	if *order.InscribeID != *checkOrder.InscribeID {
+		logutils.LogErrorf(log, "[%s]: %+v, %+v", funcName, order.InscribeID, checkOrder.InscribeID)
+		return false
+	}
+	// inscribeContent
+	if order.InscribeContent != checkOrder.InscribeContent {
+		logutils.LogErrorf(log, "[%s]: %+v, %+v", funcName, order.InscribeContent, checkOrder.InscribeContent)
+		return false
+	}
+	// tick
+	if order.Tick != checkOrder.Tick {
+		logutils.LogErrorf(log, "[%s]: %+v, %+v", funcName, order.Tick, checkOrder.Tick)
+		return false
+	}
+	// number
+	if order.Number != checkOrder.Number {
+		logutils.LogErrorf(log, "[%s]: %+v, %+v", funcName, order.Number, checkOrder.Number)
+		return false
+	}
+	return true
 }

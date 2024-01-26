@@ -47,3 +47,10 @@ func (this *Order) GetPendingOrder() ([]*Order, error) {
 		Find(&list).Error
 	return list, err
 }
+
+func (this *Order) UpdatePendingOrderState() (int64, error) {
+	result := this.getDB().
+		Where("id = ?", this.ID).
+		Update("state", this.State)
+	return result.RowsAffected, result.Error
+}
