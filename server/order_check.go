@@ -96,11 +96,6 @@ func CheckOrderInfo(order, checkOrder *brc20_market.Order) bool {
 		logutils.LogErrorf(log, "[%s]: %+v, %+v", funcName, order.InscribeID, checkOrder.InscribeID)
 		return false
 	}
-	// inscribeContent
-	if order.InscribeContent != checkOrder.InscribeContent {
-		logutils.LogErrorf(log, "[%s]: %+v, %+v", funcName, order.InscribeContent, checkOrder.InscribeContent)
-		return false
-	}
 	// tick
 	if order.Tick != checkOrder.Tick {
 		logutils.LogErrorf(log, "[%s]: %+v, %+v", funcName, order.Tick, checkOrder.Tick)
