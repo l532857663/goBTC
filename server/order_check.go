@@ -11,6 +11,7 @@ import (
 func QueryPendingOrder4DB() {
 	log := global.LOG
 	// 查询pending的订单信息
+	order := &brc20_market.Order{}
 	list, err := order.GetPendingOrder()
 	if err != nil {
 		logutils.LogErrorf(log, "GetPendingOrder error: %+v", err)
@@ -44,6 +45,7 @@ func QueryPendingOrder4DB() {
 				logutils.LogErrorf(log, "UpdatePendingOrderState error: %+v", err)
 				return
 			}
+			logutils.LogInfof(log, "data.UpdatePendingOrderState row: %+v", row)
 		}
 	}
 }
