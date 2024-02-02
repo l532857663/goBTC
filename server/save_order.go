@@ -19,16 +19,14 @@ func SaveOrder(txHash string, ordiInfo *models.OrdiInfo) {
 	// 保存铭文订单信息
 	inscriberID := txHash + "i0"
 	order := &brc20_market.Order{
-		TxHash:          txHash,
-		InscribeID:      &inscriberID,
-		InscribeContent: ordiInfo.Body,
-		Tick:            ordiInfo.Tick,
-		State:           1,
-		Amount:          ordiInfo.Amount,
-		ServerFee:       ordiInfo.ServiceFee,
-		GasFee:          &ordiInfo.GasFee,
-		GasFeeTotal:     &ordiInfo.GasFeeTotal,
-		To:              &ordiInfo.To,
+		TxHash:     txHash,
+		InscribeID: &inscriberID,
+		Tick:       ordiInfo.Tick,
+		State:      1,
+		Amount:     ordiInfo.Amount,
+		ServerFee:  ordiInfo.ServiceFee,
+		GasFee:     &ordiInfo.GasFee,
+		To:         &ordiInfo.To,
 	}
 	err := order.Create()
 	if err != nil {

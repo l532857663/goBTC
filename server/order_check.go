@@ -29,12 +29,10 @@ func QueryPendingOrder4DB() {
 		if ok {
 			// 处理状态
 			switch data.State {
-			case 1:
-				data.State = 2
-			case 4:
-				data.State = 5
-			case 6:
-				data.State = 7
+			case 2:
+				data.State = 3
+			case 5:
+				data.State = 6
 			default:
 				logutils.LogErrorf(log, "QueryPendingOrder4DB order state error: %+v", data.State)
 				return
@@ -61,12 +59,6 @@ func QueryTransferInfo(hash, inscribeId string) (*brc20_market.Order, error) {
 	if data.BlockHash == "" {
 		return nil, fmt.Errorf("the tx not ok")
 	}
-	// 获取块高
-	blockInfo, err := srv.GetBlockStatus(data.BlockHash)
-	if err != nil {
-		return nil, err
-	}
-	fmt.Printf("wch---- data: %+v\n", blockInfo)
 	// 查询到交易数据,整理铭文信息
 	inscriberInfo, err := GetInscribeInfoByHash(data.Hex)
 	if err != nil {
@@ -75,6 +67,7 @@ func QueryTransferInfo(hash, inscribeId string) (*brc20_market.Order, error) {
 	}
 	logutils.LogInfof(log, "body len: %+v", inscriberInfo.ContentSize)
 	logutils.LogInfof(log, "Brc20: %+v", inscriberInfo.Brc20.Tick)
+	logutils.LogInfof(log, "Amount: %+v", inscriberInfo.Brc20.Amt)
 	// 整理订单数据
 	amount, _ := strconv.ParseInt(inscriberInfo.Brc20.Amt, 0, 64)
 
