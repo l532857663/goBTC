@@ -22,10 +22,9 @@ func SaveOrder(txHash string, ordiInfo *models.OrdiInfo) {
 		TxHash:          txHash,
 		InscribeID:      &inscriberID,
 		InscribeContent: ordiInfo.Body,
-		ContentType:     &ordiInfo.ContentType,
 		Tick:            ordiInfo.Tick,
 		State:           1,
-		Number:          ordiInfo.Amount,
+		Amount:          ordiInfo.Amount,
 		ServerFee:       ordiInfo.ServiceFee,
 		GasFee:          &ordiInfo.GasFee,
 		GasFeeTotal:     &ordiInfo.GasFeeTotal,
@@ -84,8 +83,6 @@ func GetInscriptionInfoByOrdinals(order *brc20_market.Order) {
 				switch dtText {
 				case "id":
 					order.InscribeID = &ddContent
-				case "content type":
-					order.ContentType = &ddContent
 				case "genesis height":
 					height, _ := strconv.ParseInt(ddContent, 0, 64)
 					order.BlockHeight = &height

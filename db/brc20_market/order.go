@@ -8,24 +8,22 @@ import (
 
 type Order struct {
 	gorm.Model
-	ConfigID        int     `gorm:"column:config_id;not null"`
-	TxHash          string  `gorm:"column:tx_hash;type:varchar(255);not null"`
-	InscribeID      *string `gorm:"column:inscribe_id;type:varchar(255);default:null"`
-	InscribeNumber  *string `gorm:"column:inscribe_number;type:varchar(255);default:null"`
-	InscribeContent string  `gorm:"column:inscribe_content;type:varchar(500);default:null"`
-	ContentType     *string `gorm:"column:content_type;type:varchar(255);default:null"`
-	BlockHeight     *int64  `gorm:"column:block_height"`
-	Tick            string  `gorm:"column:tick;type:varchar(255);not null"`
-	Side            int     `gorm:"column:side;not null;default:1"`
-	State           int     `gorm:"column:state;not null;default:1"`
-	Number          int64   `gorm:"column:number;not null"`
-	Amount          int64   `gorm:"column:amount;not null"`
-	TotalAmount     int64   `gorm:"column:total_amount;not null"`
-	ServerFee       int64   `gorm:"column:server_fee;not null;default:0"`
-	GasFee          *int64  `gorm:"column:gas_fee"`
-	GasFeeTotal     *int64  `gorm:"column:gas_fee_total"`
-	From            *string `gorm:"column:from;collate:utf8mb4_general_ci"`
-	To              *string `gorm:"column:to;collate:utf8mb4_general_ci"`
+	ConfigID       int     `gorm:"column:config_id;not null"`
+	TxHash         string  `gorm:"column:tx_hash;type:varchar(255);not null"`
+	InscribeID     *string `gorm:"column:inscribe_id;type:varchar(255);default:null"`
+	InscribeNumber *string `gorm:"column:inscribe_number;type:varchar(255);default:null"`
+	ContentType    *string `gorm:"column:content_type;type:varchar(255);default:null"`
+	BlockHeight    *int64  `gorm:"column:block_height"`
+	Tick           string  `gorm:"column:tick;type:varchar(255);not null"`
+	Side           int     `gorm:"column:side;not null;default:1"`
+	State          int     `gorm:"column:state;not null;default:1"`
+	Amount         int64   `gorm:"column:amount;not null"`
+	TotalAmount    int64   `gorm:"column:total_amount;not null"`
+	ServerFee      int64   `gorm:"column:server_fee;not null;default:0"`
+	GasFee         *int64  `gorm:"column:gas_fee"`
+	GasFeeTotal    *int64  `gorm:"column:gas_fee_total"`
+	From           *string `gorm:"column:from;collate:utf8mb4_general_ci"`
+	To             *string `gorm:"column:to;collate:utf8mb4_general_ci"`
 }
 
 func (this *Order) TableName() string {

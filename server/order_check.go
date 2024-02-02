@@ -79,10 +79,9 @@ func QueryTransferInfo(hash, inscribeId string) (*brc20_market.Order, error) {
 	amount, _ := strconv.ParseInt(inscriberInfo.Brc20.Amt, 0, 64)
 
 	order := &brc20_market.Order{
-		InscribeID:      &inscribeId,
-		InscribeContent: inscriberInfo.Body, // 这个
-		Tick:            inscriberInfo.Brc20.Tick,
-		Number:          amount,
+		InscribeID: &inscribeId,
+		Tick:       inscriberInfo.Brc20.Tick,
+		Amount:     amount,
 	}
 	GetInscriptionInfoByOrdinals(order)
 	return order, nil
@@ -102,8 +101,8 @@ func CheckOrderInfo(order, checkOrder *brc20_market.Order) bool {
 		return false
 	}
 	// number
-	if order.Number != checkOrder.Number {
-		logutils.LogErrorf(log, "[%s]: %+v, %+v", funcName, order.Number, checkOrder.Number)
+	if order.Amount != checkOrder.Amount {
+		logutils.LogErrorf(log, "[%s]: %+v, %+v", funcName, order.Amount, checkOrder.Amount)
 		return false
 	}
 	return true
