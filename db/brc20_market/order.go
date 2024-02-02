@@ -38,7 +38,7 @@ func (this *Order) Create() error {
 func (this *Order) GetPendingOrder() ([]*Order, error) {
 	var list []*Order
 	err := this.getDB().
-		Where("state in (1,5)").
+		Where("state in (2,5)").
 		Find(&list).Error
 	return list, err
 }
