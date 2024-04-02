@@ -59,14 +59,14 @@ func GetBlockInfo(startHeight, newHigh int64) {
 		for j := 0; j < txInfoLength; j++ {
 			Wg.Add(1)
 			if j%100 == 0 {
-				time.Sleep(2 * time.Second)
+				time.Sleep(1 * time.Second)
 			}
 			go GetOneTxInfo(blockInfo, sum, sumBrc20, i, j, j)
 		}
 		Wg.Wait()
 		eTime := time.Now().Unix()
 		logutils.LogInfof(log, "Get block all time: [%v]", eTime-endTime)
-		logutils.LogInfof(log, "the block get inscribe sum: [%v], sumBrc20: [%v]", sum, sumBrc20)
+		logutils.LogInfof(log, "the block get inscribe sum: [%v], sumBrc20: [%v]", *sum, *sumBrc20)
 	}
 	logutils.LogInfof(log, "[GetBlockInfo] End")
 }

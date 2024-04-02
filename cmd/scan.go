@@ -25,7 +25,7 @@ func TestGetTx() {
 	for index, i := range blockList {
 		blockInfo, err := global.Client.GetBlockInfoByHeight(i)
 		if err != nil {
-			logutils.LogErrorf(global.Log, "GetBlockInfoByHash error: %+v", err)
+			logutils.LogErrorf(global.LOG, "GetBlockInfoByHash error: %+v", err)
 			return
 		}
 		fmt.Printf("wch------ test1\n")
