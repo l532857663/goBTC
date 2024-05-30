@@ -6,38 +6,11 @@ import (
 	"goBTC/global"
 	"goBTC/ord"
 	"goBTC/utils/logutils"
-	"sync"
 	"time"
 
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcd/wire"
 )
-
-var (
-	Wg  sync.WaitGroup
-	Wg1 sync.WaitGroup
-)
-
-func CheckNewHeight(startHeight int64) {
-	srv := global.Client
-	log := global.LOG
-	logutils.LogInfof(log, "[CheckNewHeight] Start")
-	for {
-		newHigh, err := srv.GetBlockCount()
-		if err != nil {
-			logutils.LogErrorf(log, "GetBlockCount error: %+v", err)
-			return
-		}
-		if startHeight > newHigh {
-			time.Sleep(5 * time.Minute)
-			continue
-		}
-		GetBlockInfo(startHeight, newHigh)
-		startHeight = newHigh + 1
-		time.Sleep(5 * time.Minute)
-		logutils.LogInfof(log, "[CheckNewHeight] Once time New high: %v", newHigh)
-	}
-}
 
 func GetBlockInfo(startHeight, newHigh int64) {
 	srv := global.Client

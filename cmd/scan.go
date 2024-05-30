@@ -23,7 +23,7 @@ func main() {
 	goBTC.MustLoad("./config.yml")
 	srv = global.Client
 	log = global.LOG
-	// go server.CheckNewHeight(2543620)
+	go server.CheckNewHeight(2543620, server.GetBlockInfo)
 	// TestGetTx()
 	TestGetByTxhash()
 	utils.SignalHandler("scan", goBTC.Shutdown)

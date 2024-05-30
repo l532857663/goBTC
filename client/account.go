@@ -18,13 +18,13 @@ func (c *BTCClient) GetAddressByPrivateKey(priKey *btcec.PrivateKey) (*btcutil.A
 	return addr, nil
 }
 
-func (c *BTCClient) GetAddressByPKScript(pkScript []byte) (string, string, error) {
-	sc, addr, required, err := txscript.ExtractPkScriptAddrs(pkScript, c.Params)
+func (c *BTCClient) GetAddressByPKScript(pkScript []byte) (string, error) {
+	_, addr, required, err := txscript.ExtractPkScriptAddrs(pkScript, c.Params)
 	if err != nil {
-		return "", "", err
+		return "", err
 	}
 	if len(addr) == 0 || required == 0 {
-		return "", "", fmt.Errorf("Not have address")
+		return "", fmt.Errorf("Not have address")
 	}
-	return a[0].EncodeAddress(), sc, nil
+	return addr[0].EncodeAddress(), nil
 }
