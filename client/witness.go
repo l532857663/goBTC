@@ -235,3 +235,53 @@ func GetVinHashAndOutput(vin wire.OutPoint) (string, string) {
 	output := fmt.Sprintf("%s:%v", txId, vin.Index)
 	return txId, output
 }
+
+// 解析Input Script inscribe
+func GetScriptStringPlus(data string) *models.OrdInscribeData {
+	char, err := hex.DecodeString(data)
+	if err != nil || len(char) == 0 {
+		fmt.Println("The string not hex string:", err)
+		return nil
+	}
+	var (
+		resObj   = &models.OrdInscribeData{}
+		res      = ""
+		i        = 0
+		headChar = char[0]
+		dataType string //铭文类型字符串
+	)
+	// 初步认定格式
+	if headChar == 0x20 {
+		// 头部数据公钥
+		res, i = getHexData(char, i, "B")
+		resObj.PubKey = res
+	} else {
+		// fmt.Printf("HeadChar: %x\n", headChar)
+		return nil
+	}
+	// 中段数据
+	if len(char) < i+3 {
+		return nil
+	}
+	flage1 := hex.EncodeToString(char[i : i+3])
+	if flage1 == "ac0063" {
+		i += 3 // 跳过ac0063(OP_CHECKSIG OP_FALSE OP_IF)
+	} else if char[i] == BTCScriptSignMap["OP_CHECKSIG"] && len(char) > i+3 {
+		i += 1 // 跳过ac
+		i = skipNothingData(char, i)
+	} else {
+		fmt.Printf("flage1: [%v] char: [%x]\n", flage1, char)
+		return nil
+	}
+	// 获取ARC20数据信息
+	res, i = getHexData(char, i, "S")
+	if res != "atom" {
+		fmt.Printf("get data type[%s: %s]\n", res, dataType)
+		return nil
+	}
+	res, i = getHexData(char, i, "S")
+	fmt.Printf("wch----- res: %+v, i: %+v\n", res, i)
+	res, i = getHexData(char, i, "S")
+	fmt.Printf("wch----- res: %+v, i: %+v\n", res, i)
+	return nil
+}

@@ -1,8 +1,11 @@
 package client
 
 import (
+	"fmt"
+
 	"github.com/btcsuite/btcd/btcec/v2"
 	"github.com/btcsuite/btcd/btcutil"
+	"github.com/btcsuite/btcd/txscript"
 )
 
 func (c *BTCClient) GetAddressByPrivateKey(priKey *btcec.PrivateKey) (*btcutil.AddressPubKeyHash, error) {
@@ -13,4 +16,15 @@ func (c *BTCClient) GetAddressByPrivateKey(priKey *btcec.PrivateKey) (*btcutil.A
 		return nil, err
 	}
 	return addr, nil
+}
+
+func (c *BTCClient) GetAddressByPKScript(pkScript []byte) (string, string, error) {
+	sc, addr, required, err := txscript.ExtractPkScriptAddrs(pkScript, c.Params)
+	if err != nil {
+		return "", "", err
+	}
+	if len(addr) == 0 || required == 0 {
+		return "", "", fmt.Errorf("Not have address")
+	}
+	return a[0].EncodeAddress(), sc, nil
 }
