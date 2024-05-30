@@ -6,7 +6,10 @@ import (
 	"goBTC/client"
 	"goBTC/global"
 	"goBTC/server"
+	"goBTC/utils"
 	"goBTC/utils/logutils"
+	"net/http"
+	"strconv"
 	"time"
 
 	"go.uber.org/zap"
@@ -16,6 +19,7 @@ var (
 	// 全局参数
 	srv *client.BTCClient
 	log *zap.Logger
+	h   int64
 )
 
 func main() {
@@ -24,12 +28,11 @@ func main() {
 	goBTC.MustLoad("./config.yml")
 	srv = global.Client
 	log = global.LOG
-	fmt.Printf("wch------ Start\n")
+
 	// TestGetTx()
-	TestGetBlock()
-	fmt.Printf("wch------ END\n")
-	// go server.CheckNewHeight(845492, server.GetTransferByBlockHeight)
-	// utils.SignalHandler("scanUTXO", goBTC.Shutdown)
+	go server.CheckNewHeight(0, server.GetTransferByBlockHeight)
+	go InitHttpService()
+	utils.SignalHandler("getUTXO", goBTC.Shutdown)
 }
 
 func TestGetTx() {
@@ -55,6 +58,20 @@ func TestGetTx() {
 	server.Wg.Wait()
 }
 
-func TestGetBlock() {
-	server.GetTransferByBlockHeight(845492, 845492)
+func TestGetBlock(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("wch------ Start\n")
+	hh := r.FormValue("h")
+	if hh != "" {
+		h, _ := strconv.ParseInt(hh, 0, 64)
+		fmt.Printf("wch----- h: %v\n", hh)
+		server.GetTransferByBlockHeight(h, h)
+	}
+	fmt.Printf("wch------ END\n")
+	w.Write([]byte("OK"))
+}
+
+func InitHttpService() {
+	http.HandleFunc("/getBlock", TestGetBlock)
+	logutils.LogInfof(global.LOG, "InitHttpService: %+v", global.CONFIG.Service.ServiceAddr)
+	http.ListenAndServe(global.CONFIG.Service.ServiceAddr, nil)
 }

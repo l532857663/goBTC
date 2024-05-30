@@ -17,9 +17,10 @@ type Server struct {
 }
 
 type ServiceConf struct {
-	ServiceAddr       string `mapstructure:"service_addr"        json:"service_addr"        yaml:"service_addr"`
-	ServiceFeeAddress string `mapstructure:"service_fee_address" json:"service_fee_address" yaml:"service_fee_address"`
-	ServiceFee        int64  `mapstructure:"service_fee"         json:"service_fee"         yaml:"service_fee"`
+	ServiceAddr           string `mapstructure:"service_addr"            json:"service_addr"            yaml:"service_addr"`
+	ServiceFeeAddress     string `mapstructure:"service_fee_address"     json:"service_fee_address"     yaml:"service_fee_address"`
+	ServiceFee            int64  `mapstructure:"service_fee"             json:"service_fee"             yaml:"service_fee"`
+	ServicePrometheusAddr string `mapstructure:"service_prometheus_addr" json:"service_prometheus_addr" yaml:"service_prometheus_addr"`
 }
 
 type Zap struct {

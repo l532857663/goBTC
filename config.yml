@@ -1,7 +1,8 @@
-service:
+service_conf:
   service_addr: ':4396'
   service_fee_address: 'tb1pg0uc7ujx6rplw4wj73etg505jh49k63s7wc3kyngf73ze7ffue4skru6ld'
   service_fee: 1024
+  service_prometheus_addr: ':4399'
 mysql:
   config: 'charset=utf8mb4&parseTime=True&loc=Local'
   max-idle-conns: 10
@@ -36,4 +37,6 @@ chain_node:
   user:
   password:  
   net:  
-
+cron_tasks:
+  get_price_service: '0 */5 * * * ?'
+  get_transfer_info: 10

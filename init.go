@@ -7,6 +7,7 @@ import (
 	"goBTC/elastic"
 	"goBTC/global"
 	"goBTC/models"
+	"goBTC/prometheus"
 	"goBTC/utils/http"
 	"goBTC/utils/logutils"
 	"io/ioutil"
@@ -32,6 +33,9 @@ func MustLoad(confPath string) {
 
 	// 初始化elastic数据库
 	elastic.InitElasticInfo(global.CONFIG.ElasticConf)
+
+	// 初始化Prometheus监控
+	go prometheus.InitService(global.CONFIG.Service)
 
 	// 数据库连接
 	if global.MysqlFlag {
