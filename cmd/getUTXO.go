@@ -6,6 +6,7 @@ import (
 	"goBTC/client"
 	"goBTC/global"
 	"goBTC/server"
+	"goBTC/utils"
 	"goBTC/utils/logutils"
 	"time"
 
@@ -24,12 +25,13 @@ func main() {
 	goBTC.MustLoad("./config.yml")
 	srv = global.Client
 	log = global.LOG
+
 	fmt.Printf("wch------ Start\n")
 	// TestGetTx()
 	TestGetBlock()
 	fmt.Printf("wch------ END\n")
 	// go server.CheckNewHeight(845492, server.GetTransferByBlockHeight)
-	// utils.SignalHandler("scanUTXO", goBTC.Shutdown)
+	utils.SignalHandler("scanUTXO", goBTC.Shutdown)
 }
 
 func TestGetTx() {
@@ -56,5 +58,5 @@ func TestGetTx() {
 }
 
 func TestGetBlock() {
-	server.GetTransferByBlockHeight(845492, 845492)
+	server.GetTransferByBlockHeight(2818745, 2818745)
 }
